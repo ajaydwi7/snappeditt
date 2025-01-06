@@ -1,0 +1,104 @@
+.timeline-container {
+  width: min(90%, 1200px);
+  margin: 0 auto;
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+}
+
+.left-content {
+  flex: 1;
+}
+
+.left-content h2 {
+  font-size: 36px;
+  font-family: "Cursive", sans-serif;
+  color: white;
+}
+
+.right-content {
+  flex: 2;
+}
+
+.timeline {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.timeline-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  margin-bottom: 40px;
+}
+
+.timeline-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.timeline-details {
+  text-align: center;
+  max-width: 600px;
+}
+
+.timeline-details h3 {
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+}
+
+.timeline-details p {
+  font-size: 14px;
+  color: lightgray;
+}
+
+.timeline-arrow {
+  margin-top: 10px;
+  width: 3rem;
+  height: 20px;
+}
+
+.btn-primary {
+  margin-top: 30px;
+  padding: 10px 30px;
+  background-color: transparent;
+  border: 2px solid whitesmoke;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  text-transform: uppercase;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .timeline-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .left-content,
+  .right-content {
+    width: 100%;
+    text-align: center;
+  }
+
+  .timeline-row {
+    margin-bottom: 30px;
+  }
+
+  .btn-primary {
+    width: 100%;
+  }
+}

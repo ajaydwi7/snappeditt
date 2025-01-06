@@ -1,0 +1,201 @@
+.nav-main {
+  position: relative;
+}
+
+.nav-container {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-evenly;
+  width: 100%;
+  align-items: center;
+  min-height: 5rem;
+  color: white;
+}
+
+.links,
+.account,
+.logo {
+  width: 100%;
+}
+.logo img {
+  width: 200px;
+}
+
+.links {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+}
+
+.desktop-links {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-around;
+  width: 100%;
+}
+.links a {
+  text-decoration: none;
+  color: #000;
+}
+.services-menu {
+  position: relative;
+  display: inline-block; /* Ensure the menu is inline for hover */
+}
+
+.services-button {
+  background: none;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  text-align: left;
+}
+
+.submenu {
+  display: none; /* Hide submenu by default */
+  position: absolute;
+  margin-top: 10px;
+  top: 100%;
+  left: 0;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  width: auto;
+  min-width: 150px;
+}
+
+.submenu a {
+  display: block;
+  padding: 20px;
+  text-decoration: none;
+  color: #000000;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.submenu a:hover {
+  background-color: #fff;
+}
+
+.services-menu:hover .submenu,
+.services-menu:focus-within .submenu {
+  display: block; /* Show submenu on hover or focus */
+}
+
+.account {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.account-details {
+  position: relative;
+  font-size: 1.4rem;
+}
+
+.contains-link-to-accounts {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.items-in-cart {
+  position: absolute;
+  content: "";
+  top: -10px;
+  right: 0;
+  left: 15px;
+  background-color: #ff0000;
+  color: white;
+  border-radius: 50%;
+  width: 1rem;
+  height: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px !important;
+}
+
+.nav-mobile {
+  display: none;
+}
+
+.hamburger {
+  display: none;
+}
+
+@media screen and (max-width: 768px) {
+  .nav-mobile {
+    display: block;
+  }
+
+  .desktop-links {
+    display: none;
+  }
+
+  .login {
+    display: none;
+  }
+  .free-trial {
+    display: none;
+  }
+  .mobile-expanded-menu .links {
+    flex-direction: column;
+    gap: 3rem;
+  }
+
+  .mobile-expanded-menu .account .login {
+    margin: 1rem auto;
+    display: block;
+  }
+
+  .mobile-expanded-menu .account {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .mobile-expanded-menu .account span {
+    display: none;
+  }
+
+  .mobile-expanded-menu .free-trial {
+    display: block;
+    margin: 1rem 0;
+  }
+
+  .mobile-expanded-menu {
+    position: absolute;
+    width: 100%;
+    background-color: #fff;
+    z-index: 3;
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
+    -webkit-transition: all 0.3s ease-in-out;
+    -moz-transition: all 0.3s ease-in-out;
+    -ms-transition: all 0.3s ease-in-out;
+    -o-transition: all 0.3s ease-in-out;
+  }
+
+  .mobile-expanded {
+    max-height: min(70rem, 100vh);
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
+    -webkit-transition: all 0.3s ease-in-out;
+    -moz-transition: all 0.3s ease-in-out;
+    -ms-transition: all 0.3s ease-in-out;
+    -o-transition: all 0.3s ease-in-out;
+  }
+
+  .logo img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .hamburger {
+    display: block;
+    background-color: #f44336;
+    border: none;
+  }
+}

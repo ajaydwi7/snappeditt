@@ -1,0 +1,68 @@
+.why-container {
+  width: min(90%, 1200px);
+  margin: 0 auto;
+}
+.section-head h2 {
+  color: #f44336;
+  font-family: "Courgette", cursive;
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 30px;
+}
+.section-head h2 span {
+  color: #1e1e1e;
+}
+.section-head p {
+  color: #818181;
+  text-align: center;
+  font-size: 1.2rem;
+  line-height: 28px;
+}
+.item {
+  background: #fff;
+  text-align: center;
+  padding: 30px 25px;
+  box-shadow: 0 0px 25px rgba(0, 0, 0, 0.07);
+  border-radius: 20px;
+  margin-bottom: 30px;
+  transition: all 0.5s ease;
+}
+.item:hover {
+  background: #3c3c3c;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  transform: translateY(-10px);
+}
+.item .icon {
+  font-size: 40px;
+  margin-bottom: 25px;
+  background: rgba(0, 0, 0, 0.07);
+  border-radius: 50%;
+  width: 90px;
+  height: 90px;
+  display: inline-block;
+  line-height: 90px;
+  transition: background 0.3s ease;
+}
+.item:hover .icon {
+  background: #fff; /* Icon background changes to white on hover */
+}
+.item .icon img {
+  width: 60px;
+  height: 60px;
+  display: inline-block;
+}
+.item h6 {
+  margin-bottom: 20px;
+  color: #1e1e1e;
+  transition: color 0.3s ease;
+  font-size: 1.5rem;
+}
+.item p {
+  font-size: 16px;
+  line-height: 26px;
+  transition: color 0.3s ease;
+}
+.item:hover h6,
+.item:hover p {
+  color: #fff;
+}

@@ -1,0 +1,91 @@
+/* Main container */
+.de-clutter-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  margin: 0 auto;
+  width: min(90%, 1200px);
+}
+
+/* Carousel section with content and image slider */
+.carousel-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  gap: 20px; /* Adds space between content and slider */
+}
+
+/* Content Area - left side */
+.details-area {
+  flex: 1;
+  max-width: 45%;
+  padding-right: 20px;
+}
+
+.details-title {
+  font-size: 24px;
+  margin-bottom: 15px;
+  color: #2d2d2d;
+  font-family: "Courgette", cursive;
+}
+
+.price-range {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #2d2d2d;
+}
+
+.add-to-cart-btn,
+.details-btn {
+  margin-right: 10px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: 2px solid #333;
+  border-radius: 25px;
+  background-color: transparent;
+  color: #333;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.add-to-cart-btn:hover,
+.details-btn:hover {
+  border-color: #f44336;
+  color: #000;
+}
+
+.service-description {
+  margin: 20px 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #4d4d4d;
+}
+
+.features-list {
+  list-style: none;
+  padding: 0;
+}
+
+.features-list li {
+  margin-bottom: 10px;
+  font-size: 1rem;
+  color: #2d2d2d;
+  display: flex;
+  align-items: center;
+}
+
+.features-list li::before {
+  content: "✔";
+  margin-right: 10px;
+  color: #00b050;
+}
+
+/* Image Comparison Slider - right side */
+.image-slider-wrapper {
+  flex: 1;
+  max-width: 50%;
+  position: relative;
+}

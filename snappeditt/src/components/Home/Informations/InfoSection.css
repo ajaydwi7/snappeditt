@@ -1,0 +1,141 @@
+/* Container */
+.info-container {
+  width: min(90%, 1200px);
+  display: flex;
+  width: 80%;
+  max-width: none;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Left Content */
+.left-info {
+  display: flex; /* Use flexbox for centering */
+  justify-content: center; /* Center content horizontally */
+  align-items: center; /* Center content vertically */
+}
+
+.info-box {
+  background-color: white; /* Card background color */
+  border-radius: 8px; /* Rounded corners for the card */
+  width: 350px;
+  padding: 20px; /* Padding for the card */
+  margin: -40% 10% 5% 10%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.info-title {
+  color: #f44336;
+  font-family: "Courgette", cursive;
+  font-size: 24px;
+  text-align: center;
+}
+
+.info-description {
+  color: #333;
+  font-size: 16px;
+  margin-top: 10px;
+  line-height: 1.6;
+}
+
+/* Right Content */
+.right-info {
+  /* Set width to 70% */
+  text-align: left; /* Left align text */
+}
+
+/* Red Text Section */
+.content-box {
+  padding: 30px;
+  border-radius: 10px;
+  color: #fff;
+}
+
+.content-box h2 {
+  margin-bottom: 20px;
+  font-size: 30px;
+  font-family: "Courgette", cursive;
+}
+
+.content-box p {
+  margin-bottom: 30px;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.read-more-btn {
+  padding: 10px 20px;
+  background-color: #ffffff00;
+  color: #fff;
+  border: 1px solid #fff;
+  border-radius: 25px;
+  cursor: pointer;
+}
+
+.read-more-btn:hover {
+  border: #000;
+  color: #ff4a44;
+  background-color: #fff;
+}
+
+.custom-shape-divider-bottom-1734074870 {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.custom-shape-divider-bottom-1734074870 svg {
+  position: relative;
+  display: block;
+  width: calc(149% + 1.3px);
+  height: 70px;
+  transform: rotateY(180deg);
+}
+
+.custom-shape-divider-bottom-1734074870 .shape-fill {
+  fill: #ffffff;
+}
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .info-container {
+    flex-direction: column; /* Stack items vertically */
+    align-items: center; /* Center items */
+    width: 100%;
+  }
+
+  .left-info,
+  .right-info {
+    width: 100%; /* Full width for both sections */
+    text-align: center; /* Center text for readability */
+  }
+
+  .info-box {
+    margin: 20px 0; /* Adjust margin for spacing */
+    width: 90%; /* Make it responsive */
+  }
+
+  .content-box {
+    padding: 20px; /* Adjust padding for smaller screens */
+    margin-top: 20px; /* Add space between info-box and content-box */
+  }
+
+  .content-box h2 {
+    font-size: 20px; /* Adjust font size */
+  }
+
+  .content-box p {
+    font-size: 14px; /* Adjust font size */
+  }
+
+  .read-more-btn {
+    padding: 10px 15px; /* Adjust padding */
+    margin-bottom: 10px;
+  }
+
+  .custom-shape-divider-bottom-1734074870 svg {
+    height: 50px; /* Reduce height on smaller screens */
+  }
+}

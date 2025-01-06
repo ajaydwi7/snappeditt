@@ -1,0 +1,102 @@
+/* General Services Section */
+.container {
+  padding: 20px;
+  width: min(90%, 1200px);
+  margin: 0 auto;
+}
+
+.service-title {
+  text-align: center;
+  font-family: var(--secondoryFont);
+  font-size: 50px;
+  font-weight: semibold;
+  color: #000;
+  margin-bottom: 1rem;
+}
+
+/* Dynamic Line */
+.dynamic-line {
+  height: 3px;
+  background-color: #ff4a44;
+  margin: 0 auto;
+  margin-bottom: 2rem;
+}
+/* Content Columns */
+.content-columns {
+  display: flex;
+  gap: 20px;
+  padding: 25px;
+  border: 1px #333;
+  border-style: none solid solid;
+}
+
+.left-column {
+  flex: 1;
+  padding-right: 20px;
+  text-align: center;
+  font-size: 16px;
+}
+
+.right-column {
+  flex: 1;
+}
+
+/* Icon Items */
+.icon-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+}
+
+.icon-item {
+  padding: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.svg-icon {
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
+}
+
+/* Check Packages Button */
+.check-packages-btn {
+  margin-top: 20px;
+  padding: 15px 20px;
+  background-color: #000;
+  color: #fff;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.3s ease;
+}
+
+.check-packages-btn:hover {
+  background-color: #e63b38; /* Darker hover effect */
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .content-columns {
+    flex-direction: column;
+  }
+
+  .content-wrapper {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .left-column {
+    margin-bottom: 20px;
+  }
+
+  .icon-items {
+    grid-template-columns: 1fr;
+  }
+
+  .dots.bottom-dots {
+    justify-content: center;
+  }
+}

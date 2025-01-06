@@ -1,0 +1,74 @@
+.main-container {
+  width: min(90%, 1200px);
+  margin: 0 auto;
+  padding: 20px;
+  text-align: center;
+}
+.packages-title {
+  text-align: left;
+  font-family: "Courgette", cursive;
+  font-size: 2.5rem;
+  color: #f44336;
+  padding-bottom: 20px;
+}
+
+.content-wrapper {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px;
+  border: 1px #333;
+  border-style: none solid solid;
+}
+
+.carousel {
+  flex: 1; /* Take up remaining space on the left side */
+  /* display: flex; */
+  justify-content: center;
+  position: relative;
+  object-fit: cover;
+}
+
+.carousel-slide {
+  width: 100%; /* Ensure the slide takes full width */
+  /* display: flex;
+  height: 500px; */
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.image-comparison-slider {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ensures the image scales properly */
+}
+
+/* Dot navigation styling - placed at the bottom */
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.dots.bottom-dots {
+  margin-top: 15px; /* Move dots to the bottom */
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.dot.active {
+  background-color: #717171;
+}
+
+/* Adjust right-side card height to match the slider */
+.right-side-card-wrapper {
+  width: 30%; /* Match the slider height */
+}

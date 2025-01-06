@@ -1,0 +1,122 @@
+.advance-container {
+  width: min(90%, 1200px);
+  margin: 0 auto;
+  padding: 40px;
+}
+
+.advance-title {
+  text-align: left;
+  font-family: "Courgette", cursive;
+  font-size: 2rem;
+  color: #f44336;
+  margin-bottom: 30px;
+  padding-bottom: 10px;
+}
+
+.carousel-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.carousel-content {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.image-slider-container {
+  position: relative;
+  text-align: center; /* Center the arrows */
+  flex: 1;
+  margin-right: 20px;
+}
+
+.content-area {
+  flex: 1;
+  padding-left: 20px;
+}
+
+.content-area-title {
+  font-size: 24px;
+  margin-bottom: 15px;
+  color: #2d2d2d;
+  font-family: "Courgette", cursive;
+}
+
+.price {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #2d2d2d;
+}
+
+.add-to-cart-btn,
+.details-btn {
+  margin-bottom: 10px;
+  padding: 10px 20px;
+  background-color: transparent;
+  color: black;
+  border: none;
+  cursor: pointer;
+}
+
+.description {
+  font-size: 16px;
+  margin-top: 15px;
+  line-height: 1.5;
+}
+
+.features-list {
+  margin-top: 20px;
+  list-style: none;
+}
+
+.features-list li {
+  font-size: 14px;
+  padding: 5px 0;
+}
+
+.dots {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.dot {
+  height: 15px;
+  width: 15px;
+  margin: 0 5px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.dot.active {
+  background-color: #f8b400;
+}
+
+.carousel-image {
+  width: 100%;
+  height: auto;
+}
+
+.carousel-controls {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px; /* Space between image and arrows */
+}
+
+.carousel-control {
+  cursor: pointer;
+  margin: 0 10px; /* Space between arrows */
+  color: #fff; /* Change this to your desired color */
+  transition: color 0.3s ease; /* Optional: Add a transition for hover effect */
+}
+
+.carousel-control:hover {
+  color: #d32f2f; /* Optional: Change color on hover */
+}

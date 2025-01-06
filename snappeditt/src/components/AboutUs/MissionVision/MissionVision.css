@@ -1,0 +1,55 @@
+.mission-vision-container {
+  width: min(90%, 1200px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 50px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.mission-vision-content {
+  flex: 1;
+  padding-right: 20px;
+}
+
+.section-title {
+  font-family: "Courgette", cursive;
+  font-size: 2.5rem;
+  text-align: left;
+  margin-bottom: 20px;
+  color: #f44336;
+}
+
+.section-text {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+  color: #555;
+}
+
+.mission-vision-image {
+  flex: 1;
+  padding-right: 50px;
+}
+.mission-vision-image img {
+  max-width: 100%;
+  object-fit: contain;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .mission-vision-container {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .mission-vision-content {
+    padding-right: 0;
+    margin-bottom: 20px;
+  }
+
+  .mission-vision-image img {
+    max-width: 100%;
+  }
+}

@@ -1,0 +1,55 @@
+.benefits {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  background-color: #ffffff;
+  margin-top: -2.5rem;
+  width: 60%;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  gap: 1rem; /* Add gap between grid items */
+}
+
+.benefit-title {
+  font-size: medium;
+}
+
+.benefit-body {
+  font-size: small;
+}
+
+.benefit-icon {
+  font-size: 2rem;
+  color: #404141;
+  display: inline-block;
+  margin-bottom: 5px;
+}
+
+.main-benefit {
+  display: flex;
+  justify-content: flex-end; /* Center content horizontally */
+}
+
+.benefits-item {
+  place-content: center;
+  text-align: center;
+}
+
+/* Responsive Adjustments for Small Screens */
+@media screen and (max-width: 768px) {
+  .benefits {
+    grid-template-columns: repeat(4, 1fr); /* Create 2x2 format */
+    width: 100%; /* Expand to full width */
+    gap: 1rem; /* Add space between items */
+  }
+}
+
+@media screen and (max-width: 500px) {
+  .benefits {
+    grid-template-columns: repeat(
+      4,
+      1fr
+    ); /* Maintain 2x2 on very small screens */
+    gap: 0.8rem; /* Adjust spacing for smaller screens */
+    padding: 0.5rem; /* Reduce padding */
+  }
+}

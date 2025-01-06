@@ -1,0 +1,130 @@
+@import "./base.css";
+
+.service-name {
+  font-family: Courgette;
+}
+
+.sub-container {
+  width: min(90%, 1200px);
+  margin: 0 auto;
+}
+
+.btn-rounded {
+  border-radius: 50px;
+  background-color: #f44336;
+  color: #f0f8ff;
+  padding: 1rem 2rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.btn-submit {
+  background-color: #f44336;
+  color: #ffffff;
+  border: none;
+  padding: 1rem 2rem;
+  font-weight: 900;
+}
+
+.hero-section {
+  /* background-color: #ff8b15; */
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+.info-section {
+  background-color: #f44336;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  position: relative;
+}
+.services-section {
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.timeline-section {
+  padding: 2rem;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+    url("../images/photographer-checking-his-camera-darkness-scaled.jpg");
+  background-size: cover;
+  background-position: center;
+  color: white;
+}
+
+.testomonials-section {
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.products-section {
+  background-color: #f9f9f9;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.about-banner {
+  background-color: #f0f8ff;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.missonVission {
+  background-color: #dfdfdfef;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+.our-values {
+  background-color: #f0f8ff;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.why-choose-us {
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.image-gallery {
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.packages-section {
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+.advance-section {
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.form-heading {
+  color: #f44336;
+}
+
+/* Adjust admin-specific styles */
+
+.sidebar {
+  transition: all 0.3s ease-in-out;
+}
+
+.main-content {
+  transition: margin-left 0.3s ease-in-out;
+}
+
+.side-panel-heading {
+  font-family: audiowide;
+}
+
+ul {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+  color: white;
+}
+
+html {
+  scroll-behavior: smooth;
+}
