@@ -27,6 +27,8 @@ import ProductPage from "./components/GlobalComponents/ProductModal/ProductPage"
 import ServicePage from "./components/OurServices/RealState/ServicePage";
 import Login from "./views/Login";
 import Register from "./views/Register";
+import OrderSummary from "./components/Cart/OrderSummary/OrderSummary";
+import Checkout from "./components/Checkout/Checkout";
 // import RequestCookie from "./components/CookieBanner/CookieBanner";
 
 function App() {
@@ -74,6 +76,7 @@ function App() {
             <Route path="/contact-us" element={<ContactUsView />} />
             <Route path="/cart" element={<CartView />} />
             <Route path="/delivery" element={<DeliveryView />} />
+            <Route path="/checkout" element={<Checkout />} />
             <Route path="*" element={<ErrorView />} />
           </Routes>
           <footer>

@@ -1,18 +1,12 @@
 const ServiceOrder = require("../models/ServiceOrder");
+const Cart = require("../models/Cart");
 const User = require("../models/User");
 
 // Controller for confirming the order
 const confirmOrder = async (req, res) => {
-  const {
-    user_id,
-    services,
-    deliveryType,
-    deliveryCost,
-    totalCost,
-    phoneNumber,
-  } = req.body;
+  const { user_id, deliveryType, phoneNumber } = req.body;
 
-  if (!user_id || !services || !phoneNumber || !deliveryType) {
+  if (!user_id || !phoneNumber || !deliveryType) {
     return res.status(400).json({ error: "Missing required fields." });
   }
 
@@ -22,28 +16,25 @@ const confirmOrder = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
+    // Retrieve the user's cart
+    const cart = await Cart.findOne({ user: user_id });
+    if (!cart || cart.services.length === 0) {
+      return res.status(400).json({ error: "Cart is empty" });
+    }
+
     // Calculate expected delivery date based on delivery type
     const currentDate = new Date();
     const expectedDeliveryDate =
       deliveryType === "Express"
-        ? new Date(currentDate.setDate(currentDate.getDate() + 5)) // 3 days for Express
+        ? new Date(currentDate.setDate(currentDate.getDate() + 3)) // 3 days for Express
         : new Date(currentDate.setDate(currentDate.getDate() + 7)); // 7 days for Standard
 
     const newOrder = new ServiceOrder({
       user: user_id,
-      services: services.map((service) => ({
-        serviceId: service.id,
-        serviceName: service.name,
-        serviceDescription: service.description || "",
-        price: service.price,
-        quantity: service.quantity,
-        totalPrice: service.totalPrice,
-        featureImage: service.featureImage,
-        formData: service.formData || {},
-      })),
+      services: cart.services,
       deliveryType,
-      deliveryCost,
-      totalCost,
+      deliveryCost: deliveryType === "Express" ? 10 : 5,
+      totalCost: cart.cartTotal + (deliveryType === "Express" ? 10 : 5),
       phoneNumber,
       status: "Pending",
       percentage_complete: 0,
@@ -51,6 +42,10 @@ const confirmOrder = async (req, res) => {
     });
 
     const savedOrder = await newOrder.save();
+
+    // Clear the cart after successful order placement
+    await Cart.findOneAndDelete({ user: user_id });
+
     res.status(200).json({
       success: true,
       message: "Order confirmed successfully",

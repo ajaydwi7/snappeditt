@@ -1,68 +1,43 @@
 import { useState } from "react";
 import { useGlobalContext } from "@/components/GlobalContext/GlobalContext";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 import "./OrderSummary.css";
 
 const OrderSummary = () => {
   const { serviceStore, modal, auth } = useGlobalContext();
   const [deliveryType, setDeliveryType] = useState("Standard");
   const [phone, setPhone] = useState("");
+  const navigate = useNavigate();
 
   const setDelivery = (type) => {
     setDeliveryType(type);
   };
 
-  const checkOut = async () => {
-    // Check if the user is logged in
-    if (!auth.state.user) {
-      modal.openModal(); // Show login modal if the user is not logged in
-      return;
-    }
-
-    if (!phone) {
-      toast.error("Please enter your phone number");
-      return;
-    }
-
-    const services = serviceStore.state.cart.map((item) => ({
-      id: item.id,
-      name: item.name,
-      description: item.description,
-      price: item.price,
-      quantity: item.quantity,
-      totalPrice: item.totalPrice,
-      featureImage: item.featureImage,
-      formData: item.formData,
-    }));
-
-    const payload = {
-      user_id: auth.state.user?.id,
-      services,
-      deliveryType,
-      deliveryCost: deliveryType === "Standard" ? 0 : 1.0,
-      totalCost: serviceStore.state.cartTotal + (deliveryType === "Standard" ? 0 : 1.0),
-      phoneNumber: phone,
-    };
-
-    try {
-      const response = await serviceStore.confirmOrder(payload);
-
-      if (response.showRegisterLogin) {
-        modal.openModal(); // If user needs to log in, show login modal
-        return;
-      }
-
-      toast.success("Your order has been placed successfully");
-
-      // Clear cart after successful order
-      serviceStore.clearCart();
-    } catch (error) {
-      toast.error("Error confirming order. Please try again.");
-    }
+  const isValidPhoneNumber = (phone) => {
+    const phoneRegex = /^[0-9]{10}$/;
+    return phoneRegex.test(phone);
   };
 
-  // Calculate total cost including shipping
-  const cartTotal = Number(serviceStore.state.cartTotal) || 0;
+  const proceedToCheckout = () => {
+    if (!auth.state.user) {
+      modal.openModal();
+      return;
+    }
+
+    if (!isValidPhoneNumber(phone)) {
+      toast.error("Please enter a valid phone number");
+      return;
+    }
+
+    const cartItems = serviceStore.state.cart || [];
+    const cartTotal = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+
+    navigate("/checkout", { state: { cartItems, cartTotal } });
+  };
+
+  const cartItems = serviceStore.state.cart || [];
+  const cartTotal = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
   const totalCost = cartTotal + (deliveryType === "Standard" ? 0 : 1.0);
 
   return (
@@ -72,6 +47,16 @@ const OrderSummary = () => {
           <div className="total-cost">
             <h4>Total Items ({serviceStore.state.cartQuantity})</h4>
             <h4>${cartTotal.toFixed(2)}</h4>
+          </div>
+          <div className="order-items">
+            {cartItems.map((item) => (
+              <div key={item.id} className="order-item">
+                <span>{item.name}</span>
+                <span>
+                  ${item.price} x {item.quantity} = ${(item.price * item.quantity).toFixed(2)}
+                </span>
+              </div>
+            ))}
           </div>
           <div className="shipping">
             <h4>Shipping</h4>
@@ -87,7 +72,7 @@ const OrderSummary = () => {
             <h4>Phone Number</h4>
             <input
               className="select-dropdown"
-              type="text"
+              type="tel"
               placeholder="Enter your phone number"
               value={phone}
               onChange={(item) => setPhone(item.target.value)}
@@ -104,8 +89,8 @@ const OrderSummary = () => {
           </div>
           <div className="final-checkout">
             <button
-              className="flat-button checkout"
-              onClick={checkOut}
+              className="flat-button checkout bg-primaryBlack"
+              onClick={proceedToCheckout}
               disabled={serviceStore.state.cartQuantity === 0}
             >
               Checkout

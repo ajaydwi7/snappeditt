@@ -1,4 +1,5 @@
 const Category = require("../models/Category");
+const Cart = require("../models/Cart");
 const serviceService = require("../services/serviceService");
 
 exports.getAllCategories = async (req, res) => {
@@ -112,5 +113,45 @@ exports.getServiceBySlug = async (req, res) => {
     res
       .status(500)
       .json({ message: "Error fetching service", error: error.message });
+  }
+};
+
+exports.confirmOrder = async (req, res) => {
+  const { userId, deliveryType, phoneNumber } = req.body;
+
+  try {
+    const cart = await Cart.findOne({ user: userId });
+    if (!cart || cart.services.length === 0) {
+      return res.status(400).json({ error: "Cart is empty" });
+    }
+
+    const currentDate = new Date();
+    const expectedDeliveryDate =
+      deliveryType === "Express"
+        ? new Date(currentDate.setDate(currentDate.getDate() + 5))
+        : new Date(currentDate.setDate(currentDate.getDate() + 7));
+
+    const newOrder = new ServiceOrder({
+      user: userId,
+      services: cart.services,
+      deliveryType,
+      deliveryCost: deliveryType === "Express" ? 10 : 5,
+      totalCost: cart.cartTotal + (deliveryType === "Express" ? 10 : 5),
+      phoneNumber,
+      expected_delivery_date: expectedDeliveryDate,
+      status: "Pending",
+    });
+
+    await newOrder.save();
+
+    // Clear cart after successful order
+    await Cart.findOneAndDelete({ user: userId });
+
+    res
+      .status(200)
+      .json({ message: "Order placed successfully", order: newOrder });
+  } catch (error) {
+    console.error("Error confirming order:", error);
+    res.status(500).json({ error: "Failed to place order" });
   }
 };

@@ -9,6 +9,8 @@ const {
 
 const router = express.Router();
 
+// Order Routes
+
 // Route to confirm an order
 router.post("/confirm", confirmOrder);
 

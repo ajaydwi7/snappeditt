@@ -21,7 +21,7 @@
 }
 
 .order-price {
-  display: flex;
+  display: grid;
   align-items: center;
 }
 
@@ -60,10 +60,9 @@ button:disabled:hover {
   cursor: not-allowed;
 }
 
-
-@media screen and (max-width:500px) {
-  .order-details{
-   grid-template-columns: 1fr;
+@media screen and (max-width: 500px) {
+  .order-details {
+    grid-template-columns: 1fr;
   }
 
   .quantity {

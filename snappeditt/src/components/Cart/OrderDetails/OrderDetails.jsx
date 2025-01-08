@@ -1,5 +1,6 @@
 import React from "react";
 import { useGlobalContext } from "@/components/GlobalContext/GlobalContext";
+import { Link, useParams } from "react-router-dom";
 
 import "./OrderDetails.css";
 
@@ -8,36 +9,55 @@ const OrderDetails = ({ service }) => {
 
   // Handle increasing quantity
   const handleIncreaseQuantity = () => {
-    serviceStore.addQuantity(service.id); // Calls the addQuantity method
+    serviceStore.addQuantity(service.id);
   };
 
   // Handle decreasing quantity
   const handleDecreaseQuantity = () => {
-    serviceStore.reduceQuantity(service.id); // Calls the reduceQuantity method
+    serviceStore.reduceQuantity(service.id);
   };
 
   // Handle removing the service from the cart
   const handleRemove = () => {
-    serviceStore.removeFromCart(service.id); // Calls the removeFromCart method
+    serviceStore.removeFromCart(service.id);
   };
+
+  const { categorySlug, serviceSlug } = useParams();
 
   return (
     <div className="order-details">
       <div className="order-detail">
         <div className="left-side">
-          {/* Display the service image */}
-          <img src={service.featureImage} alt={service.name} />
+          {/* Display the service image with a link */}
+          <Link to={`/services/${service.categorySlug}/${service.serviceSlug}`}>
+            <img src={service.featureImage} alt={service.name} />
+          </Link>
         </div>
         <div className="right-side">
-          {/* Display the service name and description */}
-          <h3>{service.name}</h3>
+          {/* Display the service name with a link */}
+          <h3>
+            <Link to={`/services/${service.serviceSlug || service.id}`}>{service.name}</Link>
+          </h3>
           <p>{service.description}</p>
+          {/* Display additional form data */}
+          {service.formData && (
+            <div className="additional-details">
+              <ul>
+                {Object.entries(service.formData).map(([key, value]) => (
+                  <li key={key}>
+                    <strong>{key}:</strong> {value}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Display the total price */}
       <div className="order-price">
-        <h3>${parseFloat(service.totalPrice).toFixed(2)}</h3>
+        <p>Price</p>
+        <h3>${parseFloat(service.price).toFixed(2)}</h3>
       </div>
 
       {/* Quantity adjustment controls */}

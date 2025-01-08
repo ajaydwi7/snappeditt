@@ -2,6 +2,8 @@ require("dotenv").config();
 
 const express = require("express");
 const routes = require("./routes/apis");
+const paymentRoutes = require("./routes/paymentRoutes");
+const cartRoutes = require("./routes/cartRoutes");
 const serviceRoutes = require("./routes/serviceRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const contactRoutes = require("./routes/contactRoutes");
@@ -71,12 +73,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Routes
-app.use("/api", routes, contactRoutes, freeTrialRoutes);
+app.use("/api", routes, cartRoutes, contactRoutes, freeTrialRoutes);
 
 //adminroutesconst adminRoutes = require('./routes/admin');
 app.use("/api/admin", adminRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/order", orderRoutes);
+app.use("/api/paypal", paymentRoutes);
 // error handling middleware
 app.use((err, req, res, next) => {
   res.status(422).send({ error: err.message });
