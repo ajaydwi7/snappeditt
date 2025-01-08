@@ -1,4 +1,5 @@
 Snappeditt
+
 Snappeditt is a web application designed to provide a seamless experience for managing and processing image retouching services. This project includes both client-side and server-side components, offering a complete solution for service management, order processing, and payment integration.
 Table of Contents
 Features
