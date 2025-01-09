@@ -1,7 +1,6 @@
 # React-e-commerce
 This is a customizable e-commerce frontend designed to make it easy for ***student developers*** to build on top of. <br> Built using Vite, The template features a clean and modern design, with a clear and consistent folder structure that makes it easy to navigate the project.
 <br>
-In addition to the frontend there's an even simpler ***backend-template*** to handle all your requests ([READ MORE](https://github.com/Mini-Sylar/react-e-commerce-backend))
 
 # Getting Started
 - Clone this repo
@@ -9,7 +8,7 @@ In addition to the frontend there's an even simpler ***backend-template*** to ha
 - run ```npm run dev```
 
 # Example Deployment
-<a href="https://react-e-commerce-sigma.vercel.app/" target="_blank">Simple React-E-Commerce Frontend</a>
+Simple React-E-Commerce Frontend
 
 ## Advantages
 - **Responsive design** :  Designed to be responsive on any device
@@ -26,16 +25,7 @@ In addition to the frontend there's an even simpler ***backend-template*** to ha
 - Modals🔥: Easy and customzizable modals
 - Orders🔥: View orders, get details on when your order will be processed, cancel or report order  
 
-## What it doesn't have 
-- SEO: This is primarily for educational purposes, if you need SEO, you would have to commit to that. 
-
 <hr>
-
-**To see a stripped down version with no JWT see [NO JWT](https://github.com/Mini-Sylar/react-e-commerce/tree/main)**
-
-## Things to note
-- When running on localhost vite uses ```.env.development``` to connect to your backend (which must be running, more info here 👉 [React E-Commerce-Backend With JWT](https://github.com/Mini-Sylar/react-e-commerce/tree/main-jwt)) . Update it when needed
-- In production mode, ```.env.production``` will be used instead.
 
 # Contributions
 Contributions are always welcome,
