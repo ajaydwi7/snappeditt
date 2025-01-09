@@ -1,5 +1,5 @@
-# React-e-commerce-backend
-The backend for [React E-Commerce Frontend](https://github.com/Mini-Sylar/react-e-commerce) built with ***Node, Express and MongoDB***
+# SnappEditt-Backend
+The backend built with ***Node, Express and MongoDB***
 
 # Getting Started
 - Clone this repo
@@ -10,12 +10,8 @@ The backend for [React E-Commerce Frontend](https://github.com/Mini-Sylar/react-
 - Get a simple starter template for building an e-commerce product (Educational Purposes)
 - Defined api routes so you can connect from any application
 - Uses mongoose which makes schema definitions easier to grasp
-- Auth🔥: This version inclueds auth(JWT), for a version with no auth checkout [No Auth Backend](https://github.com/Mini-Sylar/react-e-commerce-backend/tree/main)
+- Auth🔥: This version inclueds auth(JWT)
 - Orders🔥: Place,review and cancel orders anytime
-
-<hr>
-
-**For a stripped down version using no JWT See [NO JWT](https://github.com/Mini-Sylar/react-e-commerce-backend/tree/main)**
 
 <hr>
 
@@ -25,6 +21,3 @@ check ```.env.development``` for example
 
 # Contribution
 Found any issue? open a pull request
-
-# Example application using this backend
-<a href="https://react-e-commerce-sigma.vercel.app/" target="_blank">Simple React-E-Commerce Frontend</a>
