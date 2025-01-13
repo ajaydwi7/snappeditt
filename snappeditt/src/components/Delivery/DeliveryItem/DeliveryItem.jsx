@@ -60,7 +60,6 @@ const DeliveryItem = ({ order: initialOrder }) => {
       setOrder(updatedOrder);
     } catch (error) {
       console.error("Error fetching order status:", error.message);
-      alert("Failed to fetch the latest order status. Please try again.");
     } finally {
       setLoading(false);
     }

@@ -1,7 +1,7 @@
 .order-details {
   display: grid;
-  grid-template-columns: 2fr 1.5fr 1.5fr 0.5fr;
-  gap: 2rem;
+  grid-template-columns: 4fr 0.5fr 1.5fr 0.5fr;
+  gap: 1rem;
   background-color: #fff;
   box-shadow: 0px 0px 10px #e8e8e8;
   padding: 1rem;
@@ -9,8 +9,8 @@
 }
 
 .left-side img {
-  width: 5rem;
-  height: 5rem;
+  width: 10rem;
+  height: 10rem;
   object-fit: contain;
 }
 

@@ -12,6 +12,8 @@ const CartSchema = new Schema({
         required: true,
       },
       serviceName: { type: String, required: true },
+      serviceSlug: { type: String },
+      categorySlug: { type: String },
       serviceDescription: { type: String },
       price: { type: Number, required: true },
       quantity: { type: Number, required: true },

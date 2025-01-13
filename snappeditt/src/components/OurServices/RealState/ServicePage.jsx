@@ -47,6 +47,13 @@ const ServicePage = () => {
   };
 
   const handleAddToCart = () => {
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    if (!user || !user.id) {
+      alert("User not logged in. Please log in to add items to the cart.");
+      return;
+    }
+
     if (!selectedRetouchingType) {
       alert("Please select a retouching type.");
       return;

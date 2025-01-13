@@ -13,8 +13,7 @@ const actions = {
   CANCEL_ORDER: "CANCEL_ORDER",
   SET_LOADING: "SET_LOADING",
   SET_ERROR: "SET_ERROR",
-  UPDATE_ORDER_PROGRESS: "UPDATE_ORDER_PROGRESS",
-  UPDATE_ORDER_STATUS: "UPDATE_ORDER_STATUS",
+  CLEAR_CART_AFTER_ORDER: "CLEAR_CART_AFTER_ORDER",
 };
 
 const reducer = (state, action) => {
@@ -37,22 +36,8 @@ const reducer = (state, action) => {
         ),
         loading: false,
       };
-    case actions.UPDATE_ORDER_PROGRESS:
-      return {
-        ...state,
-        orders: state.orders.map((order) =>
-          order._id === action.orderId
-            ? { ...order, percentage_complete: action.percentage }
-            : order
-        ),
-      };
-    case actions.UPDATE_ORDER_STATUS:
-      return {
-        ...state,
-        orders: state.orders.map((order) =>
-          order._id === action.order._id ? action.order : order
-        ),
-      };
+    case actions.CLEAR_CART_AFTER_ORDER:
+      return { ...state, cart: [], cartTotal: 0, cartQuantity: 0 };
     case actions.SET_LOADING:
       return { ...state, loading: true };
     case actions.SET_ERROR:
@@ -105,6 +90,7 @@ const useOrderStore = () => {
         throw new Error(data.error || "Failed to place order");
       }
       dispatch({ type: actions.PLACE_ORDER, order: data.order });
+      dispatch({ type: actions.CLEAR_CART_AFTER_ORDER });
       toast.success("Order placed successfully!");
     } catch (error) {
       dispatch({ type: actions.SET_ERROR, error: error.message });
@@ -138,39 +124,11 @@ const useOrderStore = () => {
     }
   };
 
-  const updateOrderProgress = (orderId, percentage) => {
-    dispatch({
-      type: actions.UPDATE_ORDER_PROGRESS,
-      orderId,
-      percentage,
-    });
-  };
-
-  const getOrderStatus = async (orderId) => {
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/order/${orderId}`
-      );
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to fetch order status");
-      }
-      const order = await response.json();
-      dispatch({ type: actions.UPDATE_ORDER_STATUS, order });
-      return order;
-    } catch (error) {
-      console.error("Error fetching order status:", error);
-      throw error;
-    }
-  };
-
   return {
     state,
     fetchOrders,
     placeOrder,
     cancelOrder,
-    updateOrderProgress,
-    getOrderStatus,
   };
 };
 

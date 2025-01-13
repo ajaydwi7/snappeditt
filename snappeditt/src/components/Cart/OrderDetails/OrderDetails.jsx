@@ -1,66 +1,58 @@
 import React from "react";
 import { useGlobalContext } from "@/components/GlobalContext/GlobalContext";
-import { Link, useParams } from "react-router-dom";
-
+import { Link } from "react-router-dom";
 import "./OrderDetails.css";
 
 const OrderDetails = ({ service }) => {
   const { serviceStore } = useGlobalContext();
+  const { addToCart, removeFromCart } = serviceStore;
 
-  // Handle increasing quantity
+  // Construct the service URL
+  const serviceUrl = `/services/${service.categorySlug}/${service.serviceSlug}`;
+
   const handleIncreaseQuantity = () => {
-    serviceStore.addQuantity(service.id);
+    addToCart({ id: service.serviceId, name: service.serviceName }, 1);
   };
 
-  // Handle decreasing quantity
   const handleDecreaseQuantity = () => {
-    serviceStore.reduceQuantity(service.id);
+    addToCart({ id: service.serviceId, name: service.serviceName }, -1);
   };
 
-  // Handle removing the service from the cart
   const handleRemove = () => {
-    serviceStore.removeFromCart(service.id);
+    removeFromCart(service.serviceId);
   };
-
-  const { categorySlug, serviceSlug } = useParams();
 
   return (
     <div className="order-details">
       <div className="order-detail">
         <div className="left-side">
-          {/* Display the service image with a link */}
-          <Link to={`/services/${service.categorySlug}/${service.serviceSlug}`}>
-            <img src={service.featureImage} alt={service.name} />
+          <Link to={serviceUrl}>
+            <img src={service.featureImage} alt={service.serviceName} />
           </Link>
         </div>
         <div className="right-side">
-          {/* Display the service name with a link */}
           <h3>
-            <Link to={`/services/${service.serviceSlug || service.id}`}>{service.name}</Link>
+            <Link className="text-primaryRed" to={serviceUrl}>
+              {service.serviceName}
+            </Link>
           </h3>
-          <p>{service.description}</p>
-          {/* Display additional form data */}
           {service.formData && (
-            <div className="additional-details">
-              <ul>
-                {Object.entries(service.formData).map(([key, value]) => (
+            <ul>
+              {Object.entries(service.formData)
+                .filter(([key]) => key !== "Image Number")
+                .map(([key, value]) => (
                   <li key={key}>
                     <strong>{key}:</strong> {value}
                   </li>
                 ))}
-              </ul>
-            </div>
+            </ul>
           )}
         </div>
       </div>
-
-      {/* Display the total price */}
       <div className="order-price">
         <p>Price</p>
         <h3>${parseFloat(service.price).toFixed(2)}</h3>
       </div>
-
-      {/* Quantity adjustment controls */}
       <div className="quantity">
         <p>Quantity</p>
         <div className="increase-quantity">
@@ -71,8 +63,6 @@ const OrderDetails = ({ service }) => {
           <button onClick={handleIncreaseQuantity}>+</button>
         </div>
       </div>
-
-      {/* Remove service from cart */}
       <div className="remove">
         <button onClick={handleRemove}>Remove</button>
       </div>

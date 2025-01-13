@@ -2,10 +2,13 @@ import React, { useState } from "react";
 import { PayPalButtons } from "@paypal/react-paypal-js";
 import { toast } from "react-toastify";
 import { useLocation } from "react-router-dom";
+import { useGlobalContext } from "@/components/GlobalContext/GlobalContext";
 
-const Checkout = ({ onPaymentSuccess }) => {
+const Checkout = () => {
   const location = useLocation();
-  const { cartItems = [], cartTotal = 0 } = location.state || {};
+  const { serviceStore, orders } = useGlobalContext();
+  const cart = serviceStore.state?.cart || []; // Ensure cart is an array
+  const { clearCart } = serviceStore;
 
   const [billingDetails, setBillingDetails] = useState({
     name: "",
@@ -21,15 +24,30 @@ const Checkout = ({ onPaymentSuccess }) => {
     setBillingDetails({ ...billingDetails, [name]: value });
   };
 
-  const handlePaymentSuccess = (orderData) => {
-    toast.success("Payment successful!");
-    onPaymentSuccess(orderData);
+  const handlePaymentSuccess = async (orderData) => {
+    try {
+      await orders.placeOrder({
+        user_id: location.state.userId,
+        deliveryType: "Standard",
+        phoneNumber: billingDetails.phone,
+        services: cart,
+        totalCost: location.state.cartTotal,
+      });
+      toast.success("Order placed successfully!");
+      clearCart();
+    } catch (error) {
+      toast.error("Failed to place order.");
+    }
   };
 
   const handlePaymentError = (err) => {
     console.error("PayPal Error:", err);
     toast.error("Payment failed. Please try again.");
   };
+
+  if (!cart.length) {
+    return <div>Your cart is empty. Add some items before checkout!</div>;
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
@@ -39,13 +57,13 @@ const Checkout = ({ onPaymentSuccess }) => {
       <div className="mb-6">
         <h3 className="text-xl font-semibold mb-2">Order Details</h3>
         <ul className="list-disc pl-5">
-          {cartItems.map((item) => (
+          {cart.map((item) => (
             <li key={item.id} className="mb-1">
               {item.name} - ${item.price} x {item.quantity}
             </li>
           ))}
         </ul>
-        <p className="font-bold mt-2">Total: ${cartTotal.toFixed(2)}</p>
+        <p className="font-bold mt-2">Total: ${location.state.cartTotal.toFixed(2)}</p>
       </div>
 
       {/* Billing Details Form */}
@@ -106,14 +124,14 @@ const Checkout = ({ onPaymentSuccess }) => {
       {/* Payment Integration */}
       <div className="mb-6">
         <h3 className="text-xl font-semibold mb-2">Payment</h3>
-        {cartTotal > 0 ? (
+        {location.state.cartTotal > 0 ? (
           <PayPalButtons
             createOrder={(data, actions) => {
               return actions.order.create({
                 purchase_units: [
                   {
                     amount: {
-                      value: cartTotal.toFixed(2),
+                      value: location.state.cartTotal.toFixed(2),
                     },
                   },
                 ],
@@ -132,4 +150,4 @@ const Checkout = ({ onPaymentSuccess }) => {
   );
 };
 
-export default Checkout; 
+export default Checkout;

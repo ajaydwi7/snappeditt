@@ -73,11 +73,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Routes
-app.use("/api", routes, cartRoutes, contactRoutes, freeTrialRoutes);
+app.use("/api", routes, contactRoutes, freeTrialRoutes);
 
 //adminroutesconst adminRoutes = require('./routes/admin');
 app.use("/api/admin", adminRoutes);
 app.use("/api/services", serviceRoutes);
+app.use("/api/cart", cartRoutes);
 app.use("/api/order", orderRoutes);
 app.use("/api/paypal", paymentRoutes);
 // error handling middleware
