@@ -5,7 +5,7 @@ const PayPalButton = ({ cartTotal, cartItems, onSuccess }) => {
   // Create an order
   const createOrder = async () => {
     try {
-      const response = await fetch("/api/paypal/create-order", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/paypal/create-order`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -27,7 +27,7 @@ const PayPalButton = ({ cartTotal, cartItems, onSuccess }) => {
   // Capture the order after approval
   const onApprove = async (data) => {
     try {
-      const response = await fetch(`/api/paypal/capture-order/${data.orderID}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/paypal/capture-order/${data.orderID}`, {
         method: "POST",
       });
 

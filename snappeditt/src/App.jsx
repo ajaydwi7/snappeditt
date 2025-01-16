@@ -22,18 +22,18 @@ import ProductECommerceView from "./views/Services/ProductsEcommerceView";
 import PeopleRetouchingView from "./views/Services/PeopleRetouchingView";
 import ClippingPathExtractionView from "./views/Services/ClippingPathExtractionView";
 import ContactUsView from "./views/ContactUsView";
-import AdminRoutes from "./admin/routes/AdminRoutes";
 import ProductPage from "./components/GlobalComponents/ProductModal/ProductPage";
 import ServicePage from "./components/OurServices/RealState/ServicePage";
 import Login from "./views/Login";
 import Register from "./views/Register";
-import OrderSummary from "./components/Cart/OrderSummary/OrderSummary";
 import Checkout from "./components/Checkout/Checkout";
+
+import AdminDashboard from "./admin/pages/AdminDashboard";
 // import RequestCookie from "./components/CookieBanner/CookieBanner";
 
 function App() {
   const [loading, setLoading] = useState(true); // Add loader state
-  const { orders, modal } = useGlobalContext();
+  const { orders, modal, auth } = useGlobalContext(); // Access auth context to check user role
 
   // Fetch products and manage loading state
   useEffect(() => {
@@ -48,6 +48,8 @@ function App() {
   }, [orders]);
 
   const navigate = useNavigate();
+  const isAdmin = auth.state.user && auth.state.user.role === "admin"; // Check if the user is an admin
+
   return (
     <div>
       {loading ? (
@@ -56,14 +58,17 @@ function App() {
       ) : (
         <>
           <ScrollToTopButton />
-          <header>
-            <NavBar />
-          </header>
+          {/* Conditionally render the header based on the route and user role */}
+          {!isAdmin && (
+            <header>
+              <NavBar />
+            </header>
+          )}
           <Routes>
             <Route path="/" element={<HomeView />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/admin/*" element={<AdminRoutes />} />
+            <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/about-us" element={<AboutView />} />
             <Route path="/services/real-estate" element={<RealStateView />} />
             <Route path="services/:categorySlug/:serviceSlug" element={<ServicePage />} />

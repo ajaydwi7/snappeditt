@@ -57,9 +57,9 @@ const Checkout = () => {
       <div className="mb-6">
         <h3 className="text-xl font-semibold mb-2">Order Details</h3>
         <ul className="list-disc pl-5">
-          {cart.map((item) => (
-            <li key={item.id} className="mb-1">
-              {item.name} - ${item.price} x {item.quantity}
+          {cart.map((service) => (
+            <li key={service.id} className="mb-1">
+              {service.serviceName} - ${service.price} x {service.quantity}
             </li>
           ))}
         </ul>
