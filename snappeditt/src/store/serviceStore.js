@@ -55,6 +55,20 @@ const useServiceStore = () => {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/cart/${userId}`
       );
+
+      // Handle 404 response (cart not found)
+      if (response.status === 404) {
+        dispatch({
+          type: actions.LOAD_CART,
+          payload: {
+            cart: [],
+            cartTotal: 0,
+            cartQuantity: 0,
+          },
+        });
+        return;
+      }
+
       if (!response.ok) {
         throw new Error("Failed to fetch cart");
       }

@@ -9,7 +9,7 @@ import { BrowserRouter } from "react-router-dom";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 
 const initialOptions = {
-  "client-id": "AZklgsI9Ka6H86N64fo8l3ZOXWHXpwXP3tl7Bbe0MTiVt4fXp1cqTwY6xhct2zQrhZCNcUOgjHgSdKUD", // Replace with your PayPal client ID
+  "client-id": "AQ-UU3JAncpfA18FLRust29t9VLB9Afqj8L8CQwONbDYGa6o8Lk27xX1lrRGhggp2p_LTuZyS9Z76ezq", // Replace with your PayPal client ID
   currency: "USD",
 };
 

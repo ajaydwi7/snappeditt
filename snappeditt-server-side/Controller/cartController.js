@@ -100,7 +100,9 @@ exports.getCart = async (req, res) => {
     const cart = await Cart.findOne({ user: req.params.userId });
 
     if (!cart) {
-      return res.status(404).json({ error: "Cart not found" });
+      return res
+        .status(200)
+        .json({ services: [], cartTotal: 0, cartQuantity: 0 }); // Return empty cart
     }
 
     const updatedCart = cart.services.map((item) => ({
@@ -173,7 +175,12 @@ exports.removeFromCart = async (req, res) => {
 // Clear cart
 exports.clearCart = async (req, res) => {
   try {
-    const cart = await Cart.findOneAndDelete({ user: req.params.userId });
+    const userId = req.params.userId;
+    if (!userId) {
+      return res.status(400).json({ error: "User ID is required" });
+    }
+
+    const cart = await Cart.findOneAndDelete({ user: userId });
     if (!cart) {
       return res.status(404).json({ error: "Cart not found" });
     }

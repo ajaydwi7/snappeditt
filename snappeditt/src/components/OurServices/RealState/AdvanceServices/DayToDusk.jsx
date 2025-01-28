@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import ImageComparisonSlider from '@/components/GlobalComponents/ImageComparisonSlider/ImageComparisonSlider';
 import './AdvanceServices.css';
+import { Link } from 'react-router-dom';
 
 const DayToDusk = () => {
   const service = {
     title: "Day To Dusk",
     price: "$5.00/Image",
     description: "With our Virtual Twilight service, we convert your day shot of your exterior property to a stunning and beautiful dusk/ twilight shot.",
+    buttonUrl: '/services/real-estate/day-to-dusk',
     features: [
       { name: 'Outdoor Sky Replacement', included: true },
       { name: 'Brightness & Contrast Adjustment', included: true },
@@ -65,7 +67,7 @@ const DayToDusk = () => {
           <div className="content-area">
             <h4 className='content-area-title'>{service.title}</h4>
             <p className="price">{service.price}</p>
-            <button className="add-to-cart-btn">Add to Cart</button>
+            <button className="add-to-cart-btn"><Link to={service.buttonUrl}> Add to Cart</Link></button>
             <button className="details-btn">More Details</button>
             <p className="description">{service.description}</p>
             <ul className="features-list">

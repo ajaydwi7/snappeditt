@@ -2,6 +2,39 @@ const Category = require("../models/Category");
 const Cart = require("../models/Cart");
 const serviceService = require("../services/serviceService");
 
+// Add a new category
+exports.addCategory = async (req, res) => {
+  try {
+    const { name, slug, description } = req.body;
+
+    // Check if the category already exists
+    const existingCategory = await Category.findOne({ slug });
+    if (existingCategory) {
+      return res
+        .status(400)
+        .json({ message: "Category with this slug already exists" });
+    }
+
+    // Create a new category
+    const newCategory = new Category({
+      name,
+      slug,
+      description,
+      subCategories: [], // Initialize with empty subcategories
+    });
+
+    // Save the category to the database
+    await newCategory.save();
+
+    res.status(201).json(newCategory);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error adding category", error: error.message });
+  }
+};
+
+// Existing methods...
 exports.getAllCategories = async (req, res) => {
   try {
     const categories = await serviceService.findAll();
@@ -113,45 +146,5 @@ exports.getServiceBySlug = async (req, res) => {
     res
       .status(500)
       .json({ message: "Error fetching service", error: error.message });
-  }
-};
-
-exports.confirmOrder = async (req, res) => {
-  const { userId, deliveryType, phoneNumber } = req.body;
-
-  try {
-    const cart = await Cart.findOne({ user: userId });
-    if (!cart || cart.services.length === 0) {
-      return res.status(400).json({ error: "Cart is empty" });
-    }
-
-    const currentDate = new Date();
-    const expectedDeliveryDate =
-      deliveryType === "Express"
-        ? new Date(currentDate.setDate(currentDate.getDate() + 5))
-        : new Date(currentDate.setDate(currentDate.getDate() + 7));
-
-    const newOrder = new ServiceOrder({
-      user: userId,
-      services: cart.services,
-      deliveryType,
-      deliveryCost: deliveryType === "Express" ? 10 : 5,
-      totalCost: cart.cartTotal + (deliveryType === "Express" ? 10 : 5),
-      phoneNumber,
-      expected_delivery_date: expectedDeliveryDate,
-      status: "Pending",
-    });
-
-    await newOrder.save();
-
-    // Clear cart after successful order
-    await Cart.findOneAndDelete({ user: userId });
-
-    res
-      .status(200)
-      .json({ message: "Order placed successfully", order: newOrder });
-  } catch (error) {
-    console.error("Error confirming order:", error);
-    res.status(500).json({ error: "Failed to place order" });
   }
 };

@@ -4,59 +4,66 @@ const User = require("../models/User");
 
 // Controller for confirming the order
 const confirmOrder = async (req, res) => {
-  const { user_id, deliveryType, phoneNumber } = req.body;
+  const {
+    user_id,
+    deliveryType,
+    phoneNumber,
+    services,
+    totalCost,
+    paypalOrderId,
+    billingDetails,
+  } = req.body;
 
-  if (!user_id || !phoneNumber || !deliveryType) {
-    return res.status(400).json({ error: "Missing required fields." });
-  }
+  console.log("Confirming order with data:", req.body);
 
   try {
-    const user = await User.findById(user_id);
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
+    // Validate required fields
+    if (
+      !user_id ||
+      !deliveryType ||
+      !phoneNumber ||
+      !services ||
+      !totalCost ||
+      !paypalOrderId ||
+      !billingDetails ||
+      !billingDetails.name ||
+      !billingDetails.email ||
+      !billingDetails.address ||
+      !billingDetails.city ||
+      !billingDetails.state ||
+      !billingDetails.zip ||
+      !billingDetails.phone
+    ) {
+      console.error("Missing required fields in order payload");
+      return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Retrieve the user's cart
-    const cart = await Cart.findOne({ user: user_id });
-    if (!cart || cart.services.length === 0) {
-      return res.status(400).json({ error: "Cart is empty" });
-    }
-
-    // Calculate expected delivery date based on delivery type
-    const currentDate = new Date();
-    const expectedDeliveryDate =
-      deliveryType === "Express"
-        ? new Date(currentDate.setDate(currentDate.getDate() + 3)) // 3 days for Express
-        : new Date(currentDate.setDate(currentDate.getDate() + 7)); // 7 days for Standard
-
+    // Create new order
     const newOrder = new ServiceOrder({
       user: user_id,
-      services: cart.services,
+      services,
       deliveryType,
-      deliveryCost: deliveryType === "Express" ? 10 : 5,
-      totalCost: cart.cartTotal + (deliveryType === "Express" ? 10 : 5),
+      totalCost,
       phoneNumber,
+      paypalOrderId,
+      billingDetails,
       status: "Pending",
-      percentage_complete: 0,
-      expected_delivery_date: expectedDeliveryDate, // Save calculated date
     });
 
-    const savedOrder = await newOrder.save();
-
-    // Clear the cart after successful order placement
-    await Cart.findOneAndDelete({ user: user_id });
+    // Save order to the database
+    await newOrder.save();
+    console.log("Order saved successfully:", newOrder);
 
     res.status(200).json({
       success: true,
-      message: "Order confirmed successfully",
-      order: savedOrder,
+      message: "Order placed successfully",
+      order: newOrder,
     });
   } catch (error) {
     console.error("Error confirming order:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: "Failed to place order" });
   }
 };
-
 // Controller for fetching all orders (admin)
 const getAllOrders = async (req, res) => {
   try {

@@ -22,7 +22,6 @@ import ProductECommerceView from "./views/Services/ProductsEcommerceView";
 import PeopleRetouchingView from "./views/Services/PeopleRetouchingView";
 import ClippingPathExtractionView from "./views/Services/ClippingPathExtractionView";
 import ContactUsView from "./views/ContactUsView";
-import ProductPage from "./components/GlobalComponents/ProductModal/ProductPage";
 import ServicePage from "./components/OurServices/RealState/ServicePage";
 import Login from "./views/Login";
 import Register from "./views/Register";
@@ -72,7 +71,6 @@ function App() {
             <Route path="/about-us" element={<AboutView />} />
             <Route path="/services/real-estate" element={<RealStateView />} />
             <Route path="services/:categorySlug/:serviceSlug" element={<ServicePage />} />
-            <Route path="/services/real-estate/day-to-dusk" element={<ProductPage />} />
             <Route path="/services/3d-services" element={<ThreeDServicesView />} />
             <Route path="/services/wedding-events" element={<WeddingEventsView />} />
             <Route path="/services/products-ecommerce" element={<ProductECommerceView />} />

@@ -8,6 +8,8 @@ const DeliveryItem = ({ order: initialOrder }) => {
   const [order, setOrder] = useState(initialOrder); // Local state for the order
   const [loading, setLoading] = useState(false);
 
+  const { auth, orders } = useGlobalContext(); // Access auth and orders from global context
+
   const currentDate = new Date();
   const formattedDate = new Date(order.expected_delivery_date).toLocaleDateString("en-US", {
     month: "long",
@@ -51,13 +53,21 @@ const DeliveryItem = ({ order: initialOrder }) => {
     return "Delivered";
   };
 
-  const { orders } = useGlobalContext();
-
   const fetchOrderStatus = async () => {
     setLoading(true);
     try {
-      const updatedOrder = await orders.getOrderStatus(order._id);
-      setOrder(updatedOrder);
+      const userId = auth.state.user?.id; // Get the current user's ID
+      if (!userId) {
+        throw new Error("User ID is missing");
+      }
+
+      // Fetch orders for the current user
+      const userOrders = await orders.fetchOrders(userId);
+
+      // Update the order state with the fetched orders
+      if (userOrders && userOrders.length > 0) {
+        setOrder(userOrders[0]); // Assuming you want to display the first order
+      }
     } catch (error) {
       console.error("Error fetching order status:", error.message);
     } finally {
@@ -139,7 +149,7 @@ const DeliveryItem = ({ order: initialOrder }) => {
                       <h5>Quantity: {service.quantity}</h5>
                       {service.formData && (
                         <div className="form-data">
-                          <h6>Form Data:</h6>
+                          <h6>Order Details:</h6>
                           {Object.entries(service.formData).map(([key, value]) => (
                             <p key={key}>
                               <strong>{key}:</strong> {value}

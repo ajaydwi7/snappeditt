@@ -5,6 +5,7 @@ const router = express.Router();
 // Category Routes
 router.get("/:categories", serviceController.getAllCategories);
 router.get("/categories/:categorySlug", serviceController.getCategoryBySlug);
+router.post("/categories", serviceController.addCategory); // New route for adding a category
 
 // Subcategory Routes
 router.post(

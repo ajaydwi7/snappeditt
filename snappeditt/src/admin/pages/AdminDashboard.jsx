@@ -1,11 +1,13 @@
 import React from "react";
+import Navbar from "../components/navbar";
 import AdminSidebar from "../components/Sidebar";
 import AdminTopBar from "../components/Topbar";
 
 const Dashboard = () => {
   return (
     <div className="flex">
-      <AdminSidebar />
+      <Navbar />
+      {/* <AdminSidebar /> */}
       <div className="flex-1 bg-gray-100">
         <AdminTopBar />
         <div className="p-6">

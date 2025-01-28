@@ -52,7 +52,7 @@ const OrderSummary = () => {
     (total, item) => total + item.price * item.quantity,
     0
   );
-  const totalCost = cartTotal + (deliveryType === "Standard" ? 0 : 10);
+  const totalCost = cartTotal + (deliveryType === "Standard" ? 0 : 1);
 
   return (
     <div className="is-order-summary">

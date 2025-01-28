@@ -90,14 +90,13 @@ const useOrderStore = () => {
         throw new Error(data.error || "Failed to place order");
       }
       dispatch({ type: actions.PLACE_ORDER, order: data.order });
-      dispatch({ type: actions.CLEAR_CART_AFTER_ORDER });
+      dispatch({ type: actions.CLEAR_CART_AFTER_ORDER }); // Reset cart state
       toast.success("Order placed successfully!");
     } catch (error) {
       dispatch({ type: actions.SET_ERROR, error: error.message });
       toast.error("Error placing order: " + error.message);
     }
   };
-
   const cancelOrder = async (orderId) => {
     try {
       const response = await fetch(

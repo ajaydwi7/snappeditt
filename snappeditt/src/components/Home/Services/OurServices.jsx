@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import Tabs from "@/components/GlobalComponents/Tabs/Tabs";
 import ImageComparisonSlider from "@/components/GlobalComponents/ImageComparisonSlider/ImageComparisonSlider";
 import "./OurServices.css";
@@ -82,6 +83,7 @@ const OurServices = () => {
         { icon: DayToDusk, text: "Day to Dusk" },
       ],
       buttonText: "Check Our Packages",
+      buttonLink: "/services/real-estate",
       images: [
         [new URL('@/assets/images/Real-Estate-Manual_Blending-Raw-3.jpg', import.meta.url).href,
         new URL('@/assets/images/Real-Estate-Manual_Blending-Corrected-3.jpg', import.meta.url).href],
@@ -98,6 +100,7 @@ const OurServices = () => {
         { icon: Virtual, text: "3D Rendering" },
       ],
       buttonText: "Check Our Packages",
+      buttonLink: "/services/3d-services",
       images: [
         [new URL('@/assets/images/3D-Rendering-P-3.jpg', import.meta.url).href, null],
         [new URL('@/assets/images/3D-Rendering-1.jpg', import.meta.url).href, null
@@ -120,6 +123,7 @@ const OurServices = () => {
         { icon: Dodging, text: "Dodging & Burning" },
       ],
       buttonText: "Check Our Packages",
+      buttonLink: "/services/wedding-events",
       images: [
         [new URL('@/assets/images/Wedding-Events-HP-Raw-1.jpg', import.meta.url).href,
         new URL('@/assets/images/Wedding-Events-HP-Corrected-1.jpg', import.meta.url).href,
@@ -142,6 +146,7 @@ const OurServices = () => {
         { icon: GhostMannequin, text: "Ghost Mannequin" },
       ],
       buttonText: "Check Our Packages",
+      buttonLink: "/services/products-ecommerce",
       images: [
         [new URL('@/assets/images/Product-eComm-HP-Raw-1-2048x1365.jpg', import.meta.url).href,
         new URL('@/assets/images/Product-eComm-HP-Corrected-1-2048x1365.jpg', import.meta.url).href,
@@ -164,6 +169,7 @@ const OurServices = () => {
         { icon: Fashion, text: "Fashion Retouching" },
       ],
       buttonText: "Check Our Packages",
+      buttonLink: "/services/people-retouching",
       images: [
         [new URL('@/assets/images/Baby-SPH-Raw-3.jpg', import.meta.url).href,
         new URL('@/assets/images/Baby-SPH-Corrected-3.jpg', import.meta.url).href,
@@ -189,6 +195,7 @@ const OurServices = () => {
         { icon: ClippingPath, text: "CP with Shadows & Reflection" },
       ],
       buttonText: "Check Our Packages",
+      buttonLink: "/services/clipping-path-extraction",
       images: [
         [new URL('@/assets/images/Clipping-Path-HP-RAW-1.jpg', import.meta.url).href,
         new URL('@/assets/images/Clipping-Path-HP-Corrected-1.jpg', import.meta.url).href
@@ -212,7 +219,7 @@ const OurServices = () => {
   };
 
   return (
-    <div className="container">
+    <div id="service-item" className="container">
       <h2 className="service-title">Services We Offer......</h2>
       <div
         className="dynamic-line"
@@ -239,7 +246,7 @@ const OurServices = () => {
             ))}
           </div>
           <button className="check-packages-btn">
-            <a href="#">{currentContent.buttonText}</a>
+            <Link to={currentContent.buttonLink}>{currentContent.buttonText}</Link>
           </button>
         </div>
 
