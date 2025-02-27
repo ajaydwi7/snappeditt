@@ -63,6 +63,9 @@
   cursor: pointer;
 }
 
+.add-to-cart-btn .details-btn link {
+  color: #2d2d2d;
+}
 .description {
   font-size: 16px;
   margin-top: 15px;
@@ -96,7 +99,7 @@
 }
 
 .dot.active {
-  background-color: #f8b400;
+  background-color: #f44336;
 }
 
 .carousel-image {

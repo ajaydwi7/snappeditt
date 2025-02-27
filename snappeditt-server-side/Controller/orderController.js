@@ -1,47 +1,64 @@
+const mongoose = require("mongoose"); // Add this at the top
 const ServiceOrder = require("../models/ServiceOrder");
-const Cart = require("../models/Cart");
-const User = require("../models/User");
 
-// Controller for confirming the order
+// Confirm order
 const confirmOrder = async (req, res) => {
   const {
     user_id,
     deliveryType,
     phoneNumber,
-    services,
+    items,
     totalCost,
     paypalOrderId,
     billingDetails,
   } = req.body;
 
-  console.log("Confirming order with data:", req.body);
-
   try {
     // Validate required fields
-    if (
-      !user_id ||
-      !deliveryType ||
-      !phoneNumber ||
-      !services ||
-      !totalCost ||
-      !paypalOrderId ||
-      !billingDetails ||
-      !billingDetails.name ||
-      !billingDetails.email ||
-      !billingDetails.address ||
-      !billingDetails.city ||
-      !billingDetails.state ||
-      !billingDetails.zip ||
-      !billingDetails.phone
-    ) {
-      console.error("Missing required fields in order payload");
+    const requiredFields = [
+      user_id,
+      deliveryType,
+      phoneNumber,
+      items,
+      totalCost,
+      paypalOrderId,
+      billingDetails,
+    ];
+
+    if (requiredFields.some((field) => !field)) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Create new order
+    // Validate items structure
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: "Invalid items format" });
+    }
+
+    // Validate each item
+    for (const item of items) {
+      if (!item.serviceId || !mongoose.isValidObjectId(item.serviceId)) {
+        return res
+          .status(400)
+          .json({ error: `Invalid service ID: ${item.serviceId}` });
+      }
+      if (typeof item.basePrice !== "number" || isNaN(item.basePrice)) {
+        return res.status(400).json({ error: "Invalid base price format" });
+      }
+    }
+
+    // Create and save order
     const newOrder = new ServiceOrder({
       user: user_id,
-      services,
+      items: items.map((item) => ({
+        serviceId: item.serviceId,
+        serviceName: item.serviceName,
+        basePrice: item.basePrice,
+        finalPrice: item.finalPrice ?? item.basePrice,
+        quantity: item.quantity,
+        featureImage: item.featureImage,
+        selectedVariations: item.selectedVariations || [],
+        formData: item.formData || {},
+      })),
       deliveryType,
       totalCost,
       phoneNumber,
@@ -50,73 +67,68 @@ const confirmOrder = async (req, res) => {
       status: "Pending",
     });
 
-    // Save order to the database
     await newOrder.save();
-    console.log("Order saved successfully:", newOrder);
 
     res.status(200).json({
       success: true,
       message: "Order placed successfully",
-      order: newOrder,
+      order: newOrder.toObject(), // Convert Mongoose document to plain object
     });
   } catch (error) {
-    console.error("Error confirming order:", error);
-    res.status(500).json({ error: "Failed to place order" });
+    console.error("Order Error:", error);
+    res.status(500).json({
+      error: "Order processing failed",
+      details:
+        process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
 };
-// Controller for fetching all orders (admin)
+
+// Fetch all orders (admin)
 const getAllOrders = async (req, res) => {
   try {
     const orders = await ServiceOrder.find();
-    if (!orders || orders.length === 0) {
-      return res.status(404).json({ message: "No orders found" });
-    }
-    res.status(200).json(orders);
-  } catch (error) {
-    console.error("Error fetching all orders:", error);
-    res.status(500).json({ error: "Failed to fetch orders." });
-  }
-};
-
-// Controller for fetching orders by user ID
-const getOrdersByUser = async (req, res) => {
-  const userId = req.params.userId;
-
-  try {
-    const orders = await ServiceOrder.find({ user: userId });
-    if (!orders || orders.length === 0) {
-      return res.status(404).json({ message: "No orders found for this user" });
-    }
     res.status(200).json(orders);
   } catch (error) {
     console.error("Error fetching orders:", error);
-    res.status(500).json({ error: "Failed to fetch orders." });
+    res.status(500).json({ error: "Failed to fetch orders" });
   }
 };
 
-// Controller for cancelling the order
-const cancelOrder = async (req, res) => {
-  const { orderId } = req.body;
-
+// Fetch orders by user ID
+const getOrdersByUser = async (req, res) => {
   try {
-    const order = await ServiceOrder.findById(orderId);
+    const orders = await ServiceOrder.find({ user: req.params.userId });
+    res.status(200).json(orders);
+  } catch (error) {
+    console.error("Error fetching user orders:", error);
+    res.status(500).json({ error: "Failed to fetch user orders" });
+  }
+};
+
+// Cancel order
+// Modify cancelOrder controller
+const cancelOrder = async (req, res) => {
+  try {
+    const order = await ServiceOrder.findByIdAndUpdate(
+      req.body.orderId,
+      {
+        status: "Cancelled",
+        order_cancelled: true,
+        percentage_complete: 0,
+        cancellation_date: new Date(),
+      },
+      { new: true } // Return updated document
+    );
+
     if (!order) {
       return res.status(404).json({ error: "Order not found" });
     }
 
-    if (order.order_cancelled) {
-      return res.status(400).json({ error: "Order already cancelled" });
-    }
-
-    order.status = "Cancelled";
-    order.order_cancelled = true; // Explicitly set to true
-    order.percentage_complete = 0;
-    await order.save();
-
     res.status(200).json({
       success: true,
       message: "Order cancelled successfully",
-      order,
+      order: order.toObject(), // Convert to plain object
     });
   } catch (error) {
     console.error("Error cancelling order:", error);
@@ -124,27 +136,24 @@ const cancelOrder = async (req, res) => {
   }
 };
 
-// Controller for fetching an order by ID
+// Fetch order by ID
 const getOrderById = async (req, res) => {
-  const { orderId } = req.params;
-
   try {
-    const order = await ServiceOrder.findById(orderId);
+    const order = await ServiceOrder.findById(req.params.orderId);
     if (!order) {
       return res.status(404).json({ error: "Order not found" });
     }
-
     res.status(200).json(order);
   } catch (error) {
-    console.error("Error fetching order:", error.message);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error fetching order:", error);
+    res.status(500).json({ error: "Failed to fetch order" });
   }
 };
 
 module.exports = {
   confirmOrder,
-  getOrdersByUser,
   getAllOrders,
+  getOrdersByUser,
   cancelOrder,
   getOrderById,
 };

@@ -67,8 +67,14 @@ const DayToDusk = () => {
           <div className="content-area">
             <h4 className='content-area-title'>{service.title}</h4>
             <p className="price">{service.price}</p>
-            <button className="add-to-cart-btn"><Link to={service.buttonUrl}> Add to Cart</Link></button>
-            <button className="details-btn">More Details</button>
+            <button className="add-to-cart-btn">
+              <Link to={service.buttonUrl} className='
+              text-black'> Add to Cart</Link></button>
+            <button className="details-btn">
+              <Link to={service.buttonUrl} className='text-primaryBlack'>
+                More Details
+              </Link>
+            </button>
             <p className="description">{service.description}</p>
             <ul className="features-list">
               {service.features.map((feature, index) => (

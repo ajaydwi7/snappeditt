@@ -1,59 +1,133 @@
 const mongoose = require("mongoose");
 
-//Retouching Type schema
-const retouchingTypeSchema = new mongoose.Schema({
-  name: { type: String, required: false }, // Retouching type name (e.g., Interior, Exterior)
-  description: { type: String }, // Optional description for the retouching type
+// Variation Option schema
+const variationOptionSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+  priceAdjustment: {
+    type: Number,
+    default: 0,
+  },
+  description: {
+    type: String,
+  },
 });
 
-// Define the schema for features
+// Variation Type schema
+const variationTypeSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+  options: [variationOptionSchema],
+  required: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+// Price Combination schema
+const priceCombinationSchema = new mongoose.Schema({
+  combination: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "variationOption",
+    },
+  ],
+  price: {
+    type: Number,
+    required: true,
+  },
+});
+
+// Feature schema
 const featureSchema = new mongoose.Schema({
-  name: { type: String, required: true }, // Feature name
-  included: { type: Boolean, default: true }, // Whether the feature is included
+  name: {
+    type: String,
+    required: true,
+  },
+  included: {
+    type: Boolean,
+    default: true,
+  },
 });
 
-// Define the schema for images (before/after)
+// Image schema
 const imageSchema = new mongoose.Schema({
-  before: { type: String, required: true }, // URL for the before image
-  after: { type: String, required: true }, // URL for the after image
+  before: {
+    type: String,
+    required: true,
+  },
+  after: {
+    type: String,
+    required: true,
+  },
 });
 
-// Define the schema for form fields
-const formFieldSchema = new mongoose.Schema({
-  name: { type: String, required: true }, // Field name
-  type: { type: String, required: true }, // Field type (e.g., text, file, textarea)
-  placeholder: { type: String }, // Placeholder text
-  required: { type: Boolean, default: false }, // Whether the field is required
-});
-
-// Define the schema for services
+// Service schema
 const serviceSchema = new mongoose.Schema({
-  name: { type: String, required: true }, // Name of the service
-  slug: { type: String, unique: true, required: true }, // Unique identifier for the service
-  description: { type: String, required: true }, // Service description
-  price: { type: Number, required: true },
-  featureImage: { type: String, required: true }, // Price of the service
-  features: [featureSchema], // Array of features
-  images: [imageSchema], // Array of images (before/after)
-  formFields: [formFieldSchema], // Array of form fields for orders
-  retouchingTypes: [retouchingTypeSchema],
+  name: {
+    type: String,
+    required: true,
+  },
+  slug: {
+    type: String,
+    unique: true,
+    required: true,
+  },
+  description: {
+    type: String,
+    required: true,
+  },
+  basePrice: {
+    type: Number,
+    required: true,
+  },
+  featureImage: {
+    type: String,
+    required: true,
+  },
+  features: [featureSchema],
+  images: [imageSchema],
+  variationTypes: [variationTypeSchema],
+  priceCombinations: [priceCombinationSchema],
 });
 
-// Define the schema for subcategories
+// Subcategory schema
 const subCategorySchema = new mongoose.Schema({
-  name: { type: String, required: true }, // Name of the subcategory
-  slug: { type: String, unique: true, required: true }, // Unique identifier for the subcategory
-  description: String, // Description of the subcategory
-  services: [serviceSchema], // Array of services under this subcategory
+  name: {
+    type: String,
+    required: true,
+  },
+  slug: {
+    type: String,
+    unique: true,
+    required: true,
+  },
+  description: {
+    type: String,
+  },
+  services: [serviceSchema],
 });
 
-// Define the main category schema
+// Main Category schema
 const categorySchema = new mongoose.Schema(
   {
-    name: { type: String, required: true }, // Name of the category
-    slug: { type: String, unique: true, required: true }, // Unique identifier for the category
-    description: String, // Description of the category
-    subCategories: [subCategorySchema], // Array of subcategories under this category
+    name: {
+      type: String,
+      required: true,
+    },
+    slug: {
+      type: String,
+      unique: true,
+      required: true,
+    },
+    description: {
+      type: String,
+    },
+    subCategories: [subCategorySchema],
   },
   { timestamps: true }
 );

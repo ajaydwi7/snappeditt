@@ -219,7 +219,7 @@ const OurServices = () => {
   };
 
   return (
-    <div id="service-item" className="container">
+    <div id="services" className="container">
       <h2 className="service-title">Services We Offer......</h2>
       <div
         className="dynamic-line"

@@ -14,6 +14,7 @@ const actions = {
   SET_LOADING: "SET_LOADING",
   SET_ERROR: "SET_ERROR",
   CLEAR_CART_AFTER_ORDER: "CLEAR_CART_AFTER_ORDER",
+  ADD_ORDER: "ADD_ORDER",
 };
 
 const reducer = (state, action) => {
@@ -31,7 +32,13 @@ const reducer = (state, action) => {
         ...state,
         orders: state.orders.map((order) =>
           order._id === action.orderId
-            ? { ...order, status: "Cancelled", percentage_complete: 0 }
+            ? {
+                ...order,
+                ...action.updatedOrder,
+                status: "Cancelled",
+                order_cancelled: true,
+                percentage_complete: 0,
+              }
             : order
         ),
         loading: false,
@@ -42,6 +49,11 @@ const reducer = (state, action) => {
       return { ...state, loading: true };
     case actions.SET_ERROR:
       return { ...state, error: action.error, loading: false };
+    case actions.ADD_ORDER:
+      return {
+        ...state,
+        orders: [...state.orders, action.order],
+      };
     default:
       return state;
   }
@@ -114,13 +126,23 @@ const useOrderStore = () => {
         throw new Error("Failed to cancel order");
       }
 
-      dispatch({ type: actions.CANCEL_ORDER, orderId });
+      const data = await response.json();
+
+      dispatch({
+        type: actions.CANCEL_ORDER,
+        orderId,
+        updatedOrder: data.order, // Add this
+      });
       toast.success("Order cancelled successfully!");
+      return data.order;
     } catch (error) {
       console.error("Error cancelling order:", error);
       dispatch({ type: actions.SET_ERROR, error: error.message });
       toast.error("Failed to cancel order: " + error.message);
     }
+  };
+  const addOrder = (order) => {
+    dispatch({ type: actions.ADD_ORDER, order });
   };
 
   return {
@@ -128,6 +150,7 @@ const useOrderStore = () => {
     fetchOrders,
     placeOrder,
     cancelOrder,
+    addOrder,
   };
 };
 

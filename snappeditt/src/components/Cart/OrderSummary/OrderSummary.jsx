@@ -35,7 +35,7 @@ const OrderSummary = () => {
     }
 
     const cartTotal = cart.reduce(
-      (total, item) => total + item.price * item.quantity,
+      (total, item) => total + (item.finalPrice ?? item.basePrice) * item.quantity,
       0
     );
 
@@ -48,8 +48,9 @@ const OrderSummary = () => {
     });
   };
 
+  // Calculate total price dynamically
   const cartTotal = cart.reduce(
-    (total, item) => total + item.price * item.quantity,
+    (total, item) => total + (item.finalPrice ?? item.basePrice) * item.quantity,
     0
   );
   const totalCost = cartTotal + (deliveryType === "Standard" ? 0 : 1);
@@ -58,7 +59,7 @@ const OrderSummary = () => {
     <div className="is-order-summary">
       <div className="sub-container">
         <div className="contains-order">
-          {/* Total Cost */}
+          {/* Total Items */}
           <div className="total-cost">
             <h4>Total Items ({cartQuantity})</h4>
             <h4>${cartTotal.toFixed(2)}</h4>
@@ -70,7 +71,8 @@ const OrderSummary = () => {
               <div key={item.serviceId || item.id || item._id} className="order-item">
                 <span>{item.name}</span>
                 <span>
-                  ${item.price} x {item.quantity} = ${(item.price * item.quantity).toFixed(2)}
+                  ${item.finalPrice ?? item.basePrice} x {item.quantity} = $
+                  {((item.finalPrice ?? item.basePrice) * item.quantity).toFixed(2)}
                 </span>
               </div>
             ))}

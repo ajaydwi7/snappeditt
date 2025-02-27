@@ -2,18 +2,21 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useGlobalContext } from "@/components/GlobalContext/GlobalContext"; // Use Global Context
+import ServiceForm from "@/components/GlobalComponents/ServiceForm/ServiceForm";
 import ImageComparisonSlider from "@/components/GlobalComponents/ImageComparisonSlider/ImageComparisonSlider";
+import { toast } from "react-toastify"; // Import toast for notifications
 
 const ServicePage = () => {
   const { categorySlug, serviceSlug } = useParams();
   const [service, setService] = useState(null);
-  const [formData, setFormData] = useState({ "Image Number": 1 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeSlider, setActiveSlider] = useState(0);
-  const [selectedRetouchingType, setSelectedRetouchingType] = useState("");
+  const [selectedVariations, setSelectedVariations] = useState({});
+  const [formData, setFormData] = useState({ quantity: 1 });
+  const [formConfig, setFormConfig] = useState([]);
 
-  const { serviceStore } = useGlobalContext(); // Access serviceStore via GlobalContext
+  const { serviceStore } = useGlobalContext();
   const { addToCart, state: { cart } } = serviceStore;
 
   useEffect(() => {
@@ -21,15 +24,11 @@ const ServicePage = () => {
       try {
         const response = await axios.get(`/api/services/${categorySlug}/${serviceSlug}`);
         const fetchedService = response.data;
-
-        const initialFormData = {};
-        fetchedService.formFields.forEach((field) => {
-          initialFormData[field.name] = field.type === "number" ? 1 : ""; // Default number fields to 1
-        });
-        setFormData(initialFormData);
         setService(fetchedService);
+        loadFormConfig(fetchedService);
       } catch (err) {
-        setError("Error fetching service data. Please try again.");
+        setError("Error fetching service data. Please try again later.");
+        console.error("Service fetch error:", err);
       } finally {
         setLoading(false);
       }
@@ -38,64 +37,147 @@ const ServicePage = () => {
     fetchService();
   }, [categorySlug, serviceSlug]);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
+  const loadFormConfig = (service) => {
+    // Example dynamic form configuration
+    const config = [
+      {
+        name: "Order name",
+        label: "Order name",
+        type: "text",
+        required: true,
+        placeholder: "Order Name",
+      },
+      {
+        name: "Order Image",
+        label: "Order Image",
+        type: "text",
+        required: true,
+        placeholder: "Provide WeTransfer Dropbox or any cloud-based link for RAW images.",
+      },
+      {
+        name: "Additionals Order Details",
+        label: "Additionals Order Details",
+        type: "textarea",
+        required: true,
+        placeholder: "Additionals Order Details...",
+      },
+    ];
+    setFormConfig(config);
+  };
+
+  const handleVariationSelect = (variationType, option) => {
+    setSelectedVariations((prev) => ({
+      ...prev,
+      [variationType.name]: option,
+
     }));
   };
 
-  const handleAddToCart = () => {
-    const user = JSON.parse(localStorage.getItem("user"));
+  const clearVariationSelection = (variationTypeName) => {
+    setSelectedVariations(prev => {
+      const newState = { ...prev };
+      delete newState[variationTypeName];
+      return newState;
+    });
+  };
 
-    if (!user || !user.id) {
-      alert("User not logged in. Please log in to add items to the cart.");
-      return;
-    }
+  const calculatePrice = () => {
+    if (!service) return 0;
 
-    if (!selectedRetouchingType) {
-      alert("Please select a retouching type.");
-      return;
-    }
+    // If no variation types, use base price
+    if (service.variationTypes.length === 0) return service.basePrice;
 
-    // Parse quantity from Image Number
-    const imageNumber = parseInt(formData["Image Number"], 10) || 1;
+    const selectedIds = Object.values(selectedVariations)
+      .filter(v => v)
+      .map(v => v._id.toString());
 
-    // Add service to cart with quantity and total price
-    addToCart(
-      {
-        id: service._id,
-        name: service.name,
-        price: service.price,
-        retouchingType: selectedRetouchingType,
-        featureImage: service.featureImage,
-        formData,
-      },
-      imageNumber // Pass quantity (Image Number)
+    // Find the correct price combination
+    const combination = service.priceCombinations.find(pc =>
+      pc.combination.every(id => selectedIds.includes(id.toString())) &&
+      pc.combination.length === selectedIds.length
     );
 
-    alert(`${service.name} added to cart!`);
+    return combination ? combination.price : service.basePrice;
   };
 
 
-  const handleRemoveFromCart = () => {
-    serviceStore.removeFromCart(service._id);
-    alert(`${service.name} removed from cart.`);
+  const handleAddToCart = () => {
+    if (!service) return;
+
+    // Validate required variations
+    const requiredVariations = service.variationTypes.filter((vt) => vt.required);
+    const missingVariations = requiredVariations.some((vt) => !selectedVariations[vt.name]);
+
+    if (missingVariations) {
+      toast.error("Please select all required options");
+      return;
+    }
+
+    // Validate form data
+    const requiredFormFields = formConfig.filter((field) => field.required);
+    const missingFormFields = requiredFormFields.some((field) => !formData[field.name]);
+
+    if (missingFormFields) {
+      toast.error("Please fill all required fields");
+      return;
+    }
+
+    // Calculate the correct price before sending to `addToCart`
+    const selectedIds = Object.values(selectedVariations)
+      .filter((v) => v)
+      .map((v) => v._id.toString());
+
+    let finalPrice = service.basePrice;
+
+    if (service.variationTypes.length > 0) {
+      const combination = service.priceCombinations.find(pc =>
+        pc.combination.every(id => selectedIds.includes(id.toString())) &&
+        pc.combination.length === selectedIds.length
+      );
+
+      finalPrice = combination ? combination.price : service.basePrice;
+    }
+
+    // ServicePage.jsx - Update cartItem structure
+    const cartItem = {
+      serviceId: service._id,
+      serviceName: service.name,
+      basePrice: service.basePrice, // Ensure this is included
+      finalPrice: finalPrice,
+      quantity: parseInt(formData.quantity),
+      featureImage: service.featureImage,
+      selectedVariations: Object.entries(selectedVariations).map(([type, option]) => ({
+        variationType: type,
+        optionId: option._id,
+        optionName: option.name
+      })),
+      formData: formData,
+    };
+
+    addToCart(cartItem);
+    toast.success(`${service.name} added to cart!`);
   };
 
-  const handleRetouchingTypeSelect = (type) => {
-    setSelectedRetouchingType(type.name);
-  };
 
-  const clearSelection = () => {
-    setSelectedRetouchingType("");
-  };
+  const isInCart = cart.some((item) => item.serviceId === service?._id);
 
-  const isInCart = cart.some((item) => item.id === service?._id);
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
-  if (loading) return <div className="text-center">Loading...</div>;
-  if (error) return <div className="text-center text-red-500">{error}</div>;
+  if (error) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="service-page container mx-auto px-4 py-6">
@@ -113,7 +195,8 @@ const ServicePage = () => {
                 <button
                   key={index}
                   onClick={() => setActiveSlider(index)}
-                  className={`w-4 h-4 rounded-full ${activeSlider === index ? "bg-primaryRed" : "bg-gray-300"}`}
+                  className={`w-4 h-4 rounded-full ${activeSlider === index ? "bg-primaryRed" : "bg-gray-300"
+                    }`}
                 ></button>
               ))}
             </div>
@@ -123,105 +206,108 @@ const ServicePage = () => {
             <p className="text-grey-600 mt-6 mb-4">Features:</p>
             <ul className="list-disc pl-6 space-y-2">
               {service.features.map((feature, index) => (
-                <li key={index} className="text-gray-700">{feature.name}</li>
+                <li key={index} className="text-gray-700">
+                  {feature.name}
+                </li>
               ))}
             </ul>
           </div>
         </div>
 
+        {/* Details Section */}
         <div className="flex-1 bg-white p-6 rounded-lg shadow-lg border border-gray-300">
-          <h1 className="text-3xl font-bold text-primaryRed">{service.name}</h1>
-          <p className="text-2xl font-bold text-gray-800 mt-4">${service.price}</p>
+          <h1 className="text-4xl font-md text-primaryRed font-cursive capitalize ">{service.name}</h1>
+          <p className="text-3xl font-bold text-gray-800 mt-4 font-secondry">
+            ${service.basePrice.toFixed(2)}
+          </p>
 
-          {/* Retouching Types */}
-          <div className="mt-6">
-            <div className="flex items-center mb-4">
-              <h2 className="text-lg font-bold mr-4">Retouching Type:</h2>
-              <div className="flex flex-wrap gap-4">
-                {service.retouchingTypes.map((type, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleRetouchingTypeSelect(type)}
-                    className={`py-2 px-4 rounded-md border ${selectedRetouchingType === type.name ? "bg-primaryRed text-white" : "bg-gray-200"}`}
-                  >
-                    {type.name}
-                  </button>
-                ))}
+          {/* Updated Variations Section */}
+          <div className="bg-gray-100 p-5 mt-4 mb-4">
+            {service.variationTypes?.map((variationType) => (
+              <div key={variationType._id} className="mt-6">
+                <div className="flex items-center mb-4">
+                  <h2 className="text-md font-bold mr-4">{variationType.name}:</h2>
+                  <div className="flex flex-wrap gap-4">
+                    {variationType.options.map((option) => (
+                      <button
+                        key={option._id}
+                        onClick={() => handleVariationSelect(variationType, option)}
+                        className={`py-2 px-4 rounded-md border ${selectedVariations[variationType.name]?._id === option._id
+                          ? "border-primaryRed text-black"
+                          : "border-gray-300 hover:border-gray-500"
+                          }`}
+                      >
+                        {option.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {selectedVariations[variationType.name] && (
+                  <p className="text-gray-700 mt-2 mb-4">
+                    Selected:{" "}
+                    <span className="font-md">
+                      {selectedVariations[variationType.name].name}
+                    </span>{" "}
+                    -{" "}
+                    <span>
+                      {selectedVariations[variationType.name].description}
+                    </span>
+
+
+                    <span
+                      onClick={() => clearVariationSelection(variationType.name)}
+                      className="text-primaryRed cursor-pointer hover:underline ml-4"
+                    >
+                      Clear
+                    </span>
+
+                    {/* Show price adjustment only if it exists and is not zero */}
+                    {selectedVariations[variationType.name].priceAdjustment &&
+                      selectedVariations[variationType.name].priceAdjustment !== 0 && (
+                        <span className="ml-2">
+                          (+${selectedVariations[variationType.name].priceAdjustment.toFixed(2)})
+                        </span>
+                      )}
+
+                  </p>
+                )}
               </div>
-            </div>
-
-            {selectedRetouchingType && (
-              <p className="text-gray-700 mt-2">
-                Selected: <span className="font-bold">{selectedRetouchingType}</span> -{" "}
-                <span>{service.retouchingTypes.find(type => type.name === selectedRetouchingType)?.description}</span>
-                <span
-                  onClick={clearSelection}
-                  className="text-primaryRed cursor-pointer hover:underline ml-4"
-                >
-                  Clear Selection
-                </span>
-              </p>
-            )}
+            ))}
           </div>
 
-          <form className="mt-6">
-            {service.formFields.map((field, index) => {
-              if (field.name === "Image Number") {
-                return (
-                  <div
-                    key={index}
-                    className="flex items-center mb-4 space-x-4" // Flex container for side-by-side layout
-                  >
-                    <label
-                      htmlFor={field.id}
-                      className="sr-only" // Add this class to visually hide the label
-                    >
-                      {field.name}{" "}
-                      {field.required && (
-                        <span className="text-primaryRed">*</span>
-                      )}
-                    </label>
-                    <input
-                      id={field.id}
-                      type={field.type}
-                      name={field.name}
-                      placeholder={field.placeholder || "Enter number"} // Optional placeholder for better UX
-                      value={formData[field.name]}
-                      required={field.required}
-                      onChange={handleInputChange}
-                      className="w-20 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primaryRed"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleAddToCart}
-                      className="bg-primaryRed text-white py-2 px-4 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-primaryRed"
-                    >
-                      {isInCart ? "Update Cart" : "Add to Cart"}
-                    </button>
-                  </div>
-                );
-              } else {
-                return (
-                  <div key={index} className="mb-4">
-                    <label className="block text-gray-700 font-medium mb-2">
-                      {field.name}{" "}
-                      {field.required && <span className="text-primaryRed">*</span>}
-                    </label>
-                    <input
-                      id={field.id}
-                      type={field.type}
-                      name={field.name}
-                      placeholder={field.placeholder}
-                      value={formData[field.name]}
-                      required={field.required}
-                      onChange={handleInputChange}
-                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primaryRed"
-                    />
-                  </div>
-                );
-              }
-            })}
-          </form>
+          {/* Other Form Fields */}
+          <ServiceForm
+            formConfig={formConfig}
+            formData={formData}
+            onFormChange={setFormData}
+          />
+
+          {/* Image Number and Add to Cart Button (Side by Side) */}
+          <div className="flex items-center gap-4 mb-6">
+            <div>
+              <label className="block text-gray-700 mb-2">Image Number</label>
+              <input
+                type="number"
+                name="quantity"
+                min="1"
+                value={formData.quantity || 1}
+                onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+                className="w-20 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primaryRed"
+                required
+              />
+            </div>
+
+            {/* Add to Cart Button */}
+            <button
+              onClick={handleAddToCart}
+              className="mt-6 px-6 py-2 bg-primaryRed text-white rounded-md hover:bg-red-700 transition-colors"
+            >
+              {isInCart ? "Update Cart" : "Add to Cart"}
+            </button>
+          </div>
+
+
         </div>
       </div>
     </div>

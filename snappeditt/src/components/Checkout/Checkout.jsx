@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useGlobalContext } from "@/components/GlobalContext/GlobalContext";
 import PayPalButton from "../GlobalComponents/PayPalButton/PayPalButton";
+import { FiUser, FiMail, FiHome, FiMapPin, FiSmartphone, FiCreditCard } from "react-icons/fi";
 
 const Checkout = () => {
   const location = useLocation();
@@ -22,9 +23,9 @@ const Checkout = () => {
     phone: "",
   });
 
-  useEffect(() => {
-    console.log("Updated billingDetails:", billingDetails);
-  }, [billingDetails]);
+  // useEffect(() => {
+  //   console.log("Updated billingDetails:", billingDetails);
+  // }, [billingDetails]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -40,159 +41,160 @@ const Checkout = () => {
     return true;
   };
 
-  const handlePaymentSuccess = async (orderData) => {
+  const handlePaymentSuccess = async (savedOrderData) => {
     try {
       setIsSubmitting(true);
 
+      // Validate billing details (already done in PayPalButton, but double-check)
       if (!validateBillingDetails()) {
         setIsSubmitting(false);
         return;
       }
 
-      console.log("Billing Details before payment:", billingDetails);
+      if (!savedOrderData?.order?._id) {
+        throw new Error("Invalid order data received");
+      }
 
-      const orderPayload = {
-        user_id: location.state.userId,
-        deliveryType: "Standard",
-        phoneNumber: billingDetails.phone,
-        services: cart.map((item) => ({
-          serviceId: item.serviceId || item.id,
-          serviceName: item.serviceName,
-          price: parseFloat(item.price),
-          quantity: parseInt(item.quantity),
-          totalPrice: parseFloat(item.price) * parseInt(item.quantity),
-          featureImage: item.featureImage,
-          formData: item.formData || {},
-        })),
-        totalCost: location.state.cartTotal,
-        paypalOrderId: orderData.id,
-        billingDetails: {
-          ...billingDetails,
-        },
-      };
+      // Update frontend order state
+      orders.addOrder(savedOrderData.order); // Add the saved order to the store
 
-      await orders.placeOrder(orderPayload);
+      // Clear cart and navigate
       await clearCart(location.state.userId);
       toast.success("Order placed successfully!");
       navigate("/delivery");
     } catch (error) {
-      console.error("Error placing order:", error);
-      toast.error("Failed to place order. Please try again.");
+      console.error("Post-payment error:", error);
+      toast.error(error.message.includes("Invalid")
+        ? "Order completed but invalid data received"
+        : "Order completed but cart cleanup failed");
     } finally {
       setIsSubmitting(false);
     }
   };
 
+
   if (!cart.length) {
     return (
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-          <p className="text-yellow-700">Your cart is empty. Add some items before checkout!</p>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4 animate-fade-in">
+        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center animate-fade-in">
+          <div className="text-purple-600 text-6xl mb-4 flex justify-center">
+            <FiCreditCard className="inline-block" />
+          </div>
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">Empty Cart</h2>
+          <p className="text-gray-600 mb-6">Your cart is empty. Add some amazing items before checkout!</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
-      <h2 className="text-2xl font-bold mb-4">Checkout</h2>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4 md:p-8">
+      <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+        {/* Header Section */}
+        <div className="bg-gradient-to-r from-primaryRed to-primaryBlack p-8 text-white">
+          <h1 className="text-4xl font-bold">Secure Checkout</h1>
+          <p className="mt-2 opacity-90">Complete your purchase in just a few steps</p>
+        </div>
 
-      <div className="mb-6">
-        <h3 className="text-xl font-semibold mb-2">Order Details</h3>
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <ul className="space-y-2">
-            {cart.map((service) => (
-              <li key={service.id} className="flex justify-between items-center">
-                <span>{service.serviceName}</span>
-                <span className="text-gray-600">
-                  ${parseFloat(service.price).toFixed(2)} x {service.quantity}
-                </span>
-              </li>
-            ))}
-          </ul>
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <p className="font-bold text-lg text-right">
-              Total: ${location.state.cartTotal.toFixed(2)}
-            </p>
+        <div className="grid md:grid-cols-2 gap-8 p-8">
+          {/* Left Column - Order Details */}
+          <div className="space-y-6">
+            <section className="bg-gray-50 rounded-xl p-6 shadow-sm">
+              <h2 className="text-2xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <FiCreditCard className="text-blue-600" />
+                Order Summary
+              </h2>
+              <div className="space-y-4">
+                {cart.map((item) => (
+                  <div
+                    key={item._id}
+                    className="flex justify-between items-center bg-white p-4 rounded-lg border border-gray-100 hover:shadow transition-all animate-fade-in"
+                  >
+                    <div>
+                      <h3 className="font-medium text-gray-800">{item.serviceName}</h3>
+                      <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium text-gray-800">
+                        ${((item.finalPrice ?? item.basePrice) * item.quantity).toFixed(2)}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        ${item.finalPrice ?? item.basePrice} each
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-6 pt-4 border-t border-gray-200">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium text-gray-600">Total:</span>
+                  <span className="text-2xl font-bold text-blue-600">
+                    ${location.state.cartTotal.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          {/* Right Column - Billing & Payment */}
+          <div className="space-y-6">
+            <section className="bg-gray-50 rounded-xl p-6 shadow-sm">
+              <h2 className="text-2xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <FiUser className="text-purple-600" />
+                Billing Details
+              </h2>
+              <div className="grid grid-cols-1 gap-4">
+                {[
+                  { icon: FiUser, name: "name", placeholder: "Full Name" },
+                  { icon: FiMail, name: "email", placeholder: "Email", type: "email" },
+                  { icon: FiSmartphone, name: "phone", placeholder: "Phone Number", type: "tel" },
+                  { icon: FiHome, name: "address", placeholder: "Address" },
+                  { icon: FiMapPin, name: "city", placeholder: "City" },
+                  { icon: FiMapPin, name: "state", placeholder: "State" },
+                  { icon: FiMapPin, name: "zip", placeholder: "ZIP Code" },
+                ].map((field) => (
+                  <div key={field.name} className="relative">
+                    <field.icon className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-400" />
+                    <input
+                      type={field.type || "text"}
+                      name={field.name}
+                      placeholder={`${field.placeholder} *`}
+                      value={billingDetails[field.name]}
+                      onChange={handleInputChange}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all animate-fade-in"
+                      required
+                    />
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Payment Section */}
+            <section className="bg-gray-50 rounded-xl p-6 shadow-sm">
+              <h2 className="text-2xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <FiCreditCard className="text-green-600" />
+                Payment Method
+              </h2>
+              {location.state.cartTotal > 0 && validateBillingDetails() ? (
+                <div className="animate-fade-in">
+                  <PayPalButton
+                    cartTotal={location.state.cartTotal}
+                    cartItems={cart}
+                    onSuccess={handlePaymentSuccess}
+                    disabled={isSubmitting}
+                    phoneNumber={billingDetails.phone}
+                    userId={location.state.userId}
+                    billingDetails={billingDetails}
+                  />
+                </div>
+              ) : (
+                <div className="text-center p-4 bg-yellow-50 rounded-lg text-yellow-700">
+                  Complete all billing details to enable payment
+                </div>
+              )}
+            </section>
           </div>
         </div>
-      </div>
-
-      <div className="mb-6">
-        <h3 className="text-xl font-semibold mb-2">Billing Details</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input
-            type="text"
-            name="name"
-            placeholder="Full Name *"
-            value={billingDetails.name}
-            onChange={handleInputChange}
-            className="p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent" required />
-          <input
-            type="email"
-            name="email"
-            placeholder="Email *"
-            value={billingDetails.email}
-            onChange={handleInputChange}
-            className="p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent" required />
-
-          <input
-            type="tel"
-            name="phone"
-            placeholder="Phone Number *"
-            value={billingDetails.phone}
-            onChange={handleInputChange}
-            className="p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent" required />
-
-          <input
-            type="text"
-            name="address"
-            placeholder="Address *"
-            value={billingDetails.address}
-            onChange={handleInputChange}
-            className="p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent" required />
-
-          <input
-            type="text"
-            name="city"
-            placeholder="City *"
-            value={billingDetails.city}
-            onChange={handleInputChange}
-            className="p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent" required />
-
-          <input
-            type="text"
-            name="state"
-            placeholder="State *"
-            value={billingDetails.state}
-            onChange={handleInputChange}
-            className="p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent" required />
-
-          <input
-            type="text"
-            name="zip"
-            placeholder="ZIP Code *"
-            value={billingDetails.zip}
-            onChange={handleInputChange}
-            className="p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent" required />
-        </div>
-      </div>
-
-      <div className="mb-6">
-        <h3 className="text-xl font-semibold mb-2">Payment</h3>
-        {location.state.cartTotal > 0 && validateBillingDetails() ? (
-          <PayPalButton
-            cartTotal={location.state.cartTotal}
-            cartItems={cart}
-            onSuccess={handlePaymentSuccess}
-            disabled={isSubmitting}
-            phoneNumber={billingDetails.phone}
-            userId={location.state.userId}
-            billingDetails={billingDetails}
-          />
-        ) : (
-          <p className="text-red-500">Cart total must be greater than zero to proceed with payment.</p>
-        )}
       </div>
     </div>
   );

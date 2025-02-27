@@ -13,7 +13,7 @@ const PayPalButton = ({ cartTotal, cartItems, onSuccess, disabled, userId, phone
           orderTotal: cartTotal.toFixed(2),
           items: cartItems.map((item) => ({
             name: item.serviceName || "Unnamed Service",
-            unit_amount: { currency_code: "USD", value: parseFloat(item.price) },
+            unit_amount: { currency_code: "USD", value: (parseFloat(item.finalPrice ?? item.basePrice)).toFixed(2), },
             quantity: parseInt(item.quantity, 10) || 1,
           })),
         }),
@@ -50,6 +50,10 @@ const PayPalButton = ({ cartTotal, cartItems, onSuccess, disabled, userId, phone
         const errorData = await captureResponse.json();
         throw new Error(errorData.error || "Failed to capture payment");
       }
+      // Validate cart items before saving
+      if (!cartItems.every(item => item.basePrice && item.finalPrice)) {
+        throw new Error("Invalid price configuration in cart items");
+      }
 
       const captureData = await captureResponse.json();
       if (captureData.status === "COMPLETED") {
@@ -60,16 +64,19 @@ const PayPalButton = ({ cartTotal, cartItems, onSuccess, disabled, userId, phone
           totalCost: cartTotal,
           paypalOrderId: captureData.id,
           billingDetails,
-          services: cartItems.map((item) => ({
+          items: cartItems.map((item) => ({
             serviceId: item.serviceId || item.id,
             serviceName: item.serviceName,
-            price: parseFloat(item.price),
+            basePrice: item.basePrice, // Add this line
+            finalPrice: parseFloat(item.finalPrice ?? item.basePrice), // Changed from 'price'
             quantity: parseInt(item.quantity, 10),
-            totalPrice: parseFloat(item.price) * parseInt(item.quantity, 10),
+            totalPrice: (parseFloat(item.finalPrice ?? item.basePrice) * parseInt(item.quantity, 10)).toFixed(2),
             featureImage: item.featureImage,
             formData: item.formData || {},
+            selectedVariations: item.selectedVariations || [],
           })),
         };
+
 
         const saveOrderResponse = await fetch(`${apiUrl}/order/confirm`, {
           method: "POST",
@@ -83,14 +90,17 @@ const PayPalButton = ({ cartTotal, cartItems, onSuccess, disabled, userId, phone
           throw new Error(errorData.error || "Failed to save order to database");
         }
 
+        const savedOrderData = await saveOrderResponse.json(); // Get saved order data
         toast.success("Payment successful! Order has been placed.");
-        await onSuccess(captureData);
-      } else {
-        toast.error(`Payment not completed. Status: ${captureData.status}`);
+        await onSuccess(savedOrderData); // Pass saved order data to onSuccess
       }
     } catch (error) {
-      console.error("PayPal capture error:", error);
-      toast.error("Failed to process payment. Please try again.");
+      console.error("Full PayPal capture error:", error);
+      toast.error(
+        error.message.includes("validation")
+          ? "Order validation failed: Check your item configurations"
+          : "Payment succeeded but order creation failed. Contact support."
+      );
     }
   };
 

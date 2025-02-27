@@ -56,13 +56,19 @@ cloudinary.config({
 //   console.log(URL);
 // })();
 
-const corsConfig = {
-  credentials: true,
-  origin: process.env.FRONTEND_URL,
-  sameSite: "none",
-  Secure: true,
-};
-app.use(cors(corsConfig));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || origin.startsWith("http://localhost:")) {
+        callback(null, true); // Allow any localhost port
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+    optionsSuccessStatus: 200,
+  })
+);
 // initialize middleware
 app.use(bodyParser.json());
 

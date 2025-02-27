@@ -55,8 +55,11 @@ router.post(
     const orderId = req.params.orderId;
     const { payerId } = req.body;
 
-    console.log("Capturing PayPal order with orderId:", orderId);
-    console.log("Payer ID:", payerId);
+    console.log("Incoming capture request:", {
+      headers: req.headers,
+      body: req.body,
+      params: req.params,
+    });
 
     if (!orderId || !payerId) {
       return res.status(400).json({ error: "Missing required fields." });

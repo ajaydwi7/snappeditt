@@ -22,7 +22,10 @@ const Account = () => {
           {auth.state.user == null ? (
             <span className="account-user text-primaryRed">Guest</span>
           ) : (
-            <span className="account-user text-primaryRed">{auth.state.user.username}</span>
+            <Link to={"/user"}>
+              <span className="account-user text-primaryRed">{auth.state.user.username}
+              </span>
+            </Link>
           )}
           <span className="account-details text-primaryBlack">
             <FaShoppingCart />

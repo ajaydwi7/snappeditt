@@ -14,7 +14,7 @@ import { ToastContainer } from "react-toastify";
 import Modal from "@/components/Modals/Modal";
 import CancelOrder from "@/components/Modals/CancelOrder";
 import "react-toastify/dist/ReactToastify.css";
-import Loader from "@/components/GlobalContext/Loader";
+import Loader from "@/components/GlobalComponents/Loader/Loader";
 import RealStateView from "./views/Services/RealStateView";
 import ThreeDServicesView from "./views/Services/ThreeDServicesView";
 import WeddingEventsView from "./views/Services/WeddingEventsView";
@@ -28,46 +28,62 @@ import Register from "./views/Register";
 import Checkout from "./components/Checkout/Checkout";
 
 import AdminDashboard from "./admin/pages/AdminDashboard";
+import CustomPaymentService from "./views/Services/CustomPaymentService";
+import UserProfile from "./views/ProfileView";
 // import RequestCookie from "./components/CookieBanner/CookieBanner";
 
 function App() {
   const [loading, setLoading] = useState(true); // Add loader state
   const { orders, modal, auth } = useGlobalContext(); // Access auth context to check user role
 
-  // Fetch products and manage loading state
+  /// Add a minimum loading time
+  const MIN_LOADING_TIME = 1000; // 2 seconds
+
   useEffect(() => {
     const fetchServices = async () => {
-      if (orders.state && orders.state.services && orders.state.services.length === 0) {
-        await orders.fetchOrders();
+      const startTime = Date.now();
+
+      try {
+        if (orders.state?.services?.length === 0) {
+          await orders.fetchOrders();
+        }
+      } finally {
+        // Calculate remaining time to meet minimum duration
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(MIN_LOADING_TIME - elapsed, 0);
+
+        // Wait for remaining time before hiding loader
+        setTimeout(() => setLoading(false), remaining);
       }
-      setLoading(false); // Set loading to false once products are fetched
     };
 
     fetchServices();
   }, [orders]);
 
-  const navigate = useNavigate();
-  const isAdmin = auth.state.user && auth.state.user.role === "admin"; // Check if the user is an admin
-
   return (
     <div>
       {loading ? (
-        // Display loader while loading is true
-        <Loader duration={5000} />
+        // Display the loader while loading is true
+        <div style={{
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+        }}>
+          <Loader />
+        </div>
       ) : (
         <>
           <ScrollToTopButton />
-          {/* Conditionally render the header based on the route and user role */}
-          {!isAdmin && (
-            <header>
-              <NavBar />
-            </header>
-          )}
+          <header>
+            <NavBar />
+          </header>
+
           <Routes>
             <Route path="/" element={<HomeView />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/user" element={<UserProfile />} />
             <Route path="/about-us" element={<AboutView />} />
             <Route path="/services/real-estate" element={<RealStateView />} />
             <Route path="services/:categorySlug/:serviceSlug" element={<ServicePage />} />
@@ -76,6 +92,7 @@ function App() {
             <Route path="/services/products-ecommerce" element={<ProductECommerceView />} />
             <Route path="/services/people-retouching" element={<PeopleRetouchingView />} />
             <Route path="/services/clipping-path-extraction" element={<ClippingPathExtractionView />} />
+            <Route path="/services/custom-payment-service" element={<CustomPaymentService />} />
             <Route path="/contact-us" element={<ContactUsView />} />
             <Route path="/cart" element={<CartView />} />
             <Route path="/delivery" element={<DeliveryView />} />

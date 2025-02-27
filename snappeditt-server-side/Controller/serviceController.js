@@ -123,13 +123,16 @@ exports.getAllServices = async (req, res) => {
   }
 };
 
+// Get service by slug
 exports.getServiceBySlug = async (req, res) => {
   const { categorySlug, serviceSlug } = req.params;
+
   try {
     const category = await Category.findOne({ slug: categorySlug });
     if (!category) {
-      return res.status(404).json({ message: "Category not found" });
+      return res.status(404).json({ error: "Category not found" });
     }
+
     let foundService = null;
     category.subCategories.forEach((subCategory) => {
       subCategory.services.forEach((service) => {
@@ -138,13 +141,16 @@ exports.getServiceBySlug = async (req, res) => {
         }
       });
     });
+
     if (!foundService) {
-      return res.status(404).json({ message: "Service not found" });
+      return res.status(404).json({ error: "Service not found" });
     }
+
     res.status(200).json(foundService);
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error fetching service", error: error.message });
+    console.error("Error fetching service:", error);
+    res.status(500).json({ error: "Failed to fetch service" });
   }
 };
+
+// Other service-related controllers...
