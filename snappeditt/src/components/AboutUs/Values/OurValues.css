@@ -7,6 +7,7 @@
   padding: 60px;
   margin: 0 auto;
   position: relative;
+  overflow: hidden;
 }
 
 .our-values-image img {
@@ -41,7 +42,7 @@
   bottom: 0;
   left: 0;
   width: 150px; /* Default width, will expand on scroll */
-  transition: width 0.2s ease-in-out;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .our-values-grid {
@@ -85,11 +86,22 @@
 /* Responsive Styles */
 @media (max-width: 768px) {
   .our-values-container {
+    width: 100%;
     grid-template-columns: 1fr;
     text-align: center;
+    overflow: hidden;
+    padding: 20px 0px; /* Reduce padding on mobile */
   }
 
   .our-values-grid {
     grid-template-columns: 1fr;
+  }
+
+  .our-values-title {
+    font-size: 2rem;
+  }
+
+  .our-values-content {
+    padding: 0;
   }
 }

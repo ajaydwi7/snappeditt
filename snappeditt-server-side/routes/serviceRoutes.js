@@ -22,14 +22,20 @@ router.post(
   "/categories/:categorySlug/:subCategorySlug/services",
   serviceController.addService
 );
-router.get(
-  "/categories/:categorySlug/:subCategorySlug/:serviceSlug",
-  serviceController.getServiceBySlug
-);
 
 // Define the route for getting all services
 router.get("/get-services", serviceController.getAllServices);
 
 router.get("/:categorySlug/:serviceSlug", serviceController.getServiceBySlug);
+
+router.put("/categories/:categorySlug", serviceController.updateCategory);
+router.put(
+  "/categories/:categorySlug/subcategories/:subCategorySlug",
+  serviceController.updateSubcategory
+);
+router.put(
+  "/categories/:categorySlug/subcategories/:subCategorySlug/services/:serviceSlug",
+  serviceController.updateService
+);
 
 module.exports = router;

@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import ImageComparisonSlider from '@/components/GlobalComponents/ImageComparisonSlider/ImageComparisonSlider';
+import { Link } from 'react-router-dom';
 
 const VirtualStaging = () => {
   const service = {
     title: "Virtual Staging",
     price: "$0.00 – $25.00/Image",
     description: "Our professional editors will add furniture virtually to the empty room image. With this service, it allows buyers to visualize themselves in the home. We use Modern, Contemporary, Traditional, Urban style furniture depending on the client's requirement.",
+    addToCartBtn: '/services/real-estate/virtual-staging',
     images: [
       [
         new URL('@/assets/images/Declutter-SPH-Raw-1.jpg', import.meta.url).href,
@@ -34,8 +36,10 @@ const VirtualStaging = () => {
         <div className="details-area">
           <h4 className="details-title">{service.title}</h4>
           <p className="price-range">{service.price}</p>
-          <button className="add-to-cart-btn">Add to Cart</button>
-          <button className="details-btn">More Details</button>
+          <button className="add-to-cart-btn"><Link to={service.addToCartBtn} className='
+              text-black'> Add to Cart</Link></button>
+          <button className="details-btn"><Link to={service.moreBtn} className='
+              text-black'> More Details</Link></button>
           <p className="service-description">{service.description}</p>
         </div>
 

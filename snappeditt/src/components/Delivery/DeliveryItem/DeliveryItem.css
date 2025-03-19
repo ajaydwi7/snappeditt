@@ -1,6 +1,9 @@
 .delivery-summary {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  padding: 1.5rem;
+  border-bottom: 2px solid #f8f8f8;
 }
 
 .expand-collapse-delivery {
@@ -92,7 +95,11 @@
   margin-block: 0.5rem;
   color: #3a3939;
 }
-
+.progress-bar {
+  width: 100%;
+  margin-top: 1rem;
+  filter: drop-shadow(0 2px 4px rgba(34, 204, 0, 0.1));
+}
 progress[value] {
   /* Reset the default appearance */
   -webkit-appearance: none;
@@ -226,12 +233,12 @@ progress[value]::-moz-progress-bar {
 }
 
 .report-issue {
-  color: #ffb300 !important;
-  border-color: #ffb300 !important;
+  color: #f44336 !important;
+  border-color: #f44336 !important;
 }
 
 .report-issue:hover {
-  background-color: #ffb300 !important;
+  background-color: #f44336 !important;
   color: #ffffff !important;
 }
 
@@ -240,6 +247,70 @@ progress[value]::-moz-progress-bar {
   padding-top: 1rem;
   display: flex;
   justify-content: flex-end;
+}
+/* Selected Variations */
+.selected-variations {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.variation-item {
+  display: flex;
+  gap: 8px;
+  margin: 4px 0;
+}
+
+.variation-type {
+  font-weight: 500;
+  color: #334155;
+}
+
+.variation-option {
+  color: #64748b;
+}
+/* Payment Status */
+.success-flair {
+  background: #d1fae5;
+  color: #065f46;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.warning-flair {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+.btn-cancel {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease !important;
+  border-radius: 8px !important;
+  padding: 0.8rem 2rem !important;
+  border: 2px solid !important;
+}
+
+.btn-cancel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: 0.5s;
+}
+
+.btn-cancel:hover::before {
+  left: 100%;
 }
 
 @media screen and (max-width: 500px) {

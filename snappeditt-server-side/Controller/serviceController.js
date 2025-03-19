@@ -1,5 +1,4 @@
 const Category = require("../models/Category");
-const Cart = require("../models/Cart");
 const serviceService = require("../services/serviceService");
 
 // Add a new category
@@ -91,11 +90,27 @@ exports.getSubcategoryBySlug = async (req, res) => {
 
 exports.addService = async (req, res) => {
   try {
+    const serviceData = req.body;
+
+    // Validate price combinations when variations exist
+    // if (serviceData.variationTypes?.length > 0) {
+    //   if (
+    //     !serviceData.priceCombinations ||
+    //     serviceData.priceCombinations.length === 0
+    //   ) {
+    //     return res.status(400).json({
+    //       message: "Price combinations required when variations exist",
+    //     });
+    //   }
+    // }
+
+    // Rest of the controller logic remains same
     const updatedSubcategory = await serviceService.addServiceToSubcategory(
       req.params.categorySlug,
       req.params.subCategorySlug,
-      req.body
+      serviceData
     );
+
     res.status(201).json(updatedSubcategory);
   } catch (error) {
     res
@@ -128,6 +143,7 @@ exports.getServiceBySlug = async (req, res) => {
   const { categorySlug, serviceSlug } = req.params;
 
   try {
+    res.setHeader("Content-Type", "application/json");
     const category = await Category.findOne({ slug: categorySlug });
     if (!category) {
       return res.status(404).json({ error: "Category not found" });
@@ -150,6 +166,102 @@ exports.getServiceBySlug = async (req, res) => {
   } catch (error) {
     console.error("Error fetching service:", error);
     res.status(500).json({ error: "Failed to fetch service" });
+  }
+};
+
+// Update entire category
+exports.updateCategory = async (req, res) => {
+  try {
+    const { categorySlug } = req.params;
+    const updateData = req.body;
+
+    const updatedCategory = await Category.findOneAndUpdate(
+      { slug: categorySlug },
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedCategory) {
+      return res.status(404).json({ message: "Category not found" });
+    }
+
+    res.status(200).json(updatedCategory);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error updating category", error: error.message });
+  }
+};
+
+// Update subcategory
+exports.updateSubcategory = async (req, res) => {
+  try {
+    const { categorySlug, subCategorySlug } = req.params;
+    const updateData = req.body;
+
+    const updatedCategory = await Category.findOneAndUpdate(
+      {
+        slug: categorySlug,
+        "subCategories.slug": subCategorySlug,
+      },
+      {
+        $set: {
+          "subCategories.$.name": updateData.name,
+          "subCategories.$.slug": updateData.slug,
+          "subCategories.$.description": updateData.description,
+        },
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedCategory) {
+      return res.status(404).json({ message: "Subcategory not found" });
+    }
+
+    res.status(200).json(updatedCategory);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error updating subcategory", error: error.message });
+  }
+};
+
+// Update service
+exports.updateService = async (req, res) => {
+  try {
+    const { categorySlug, subCategorySlug, serviceSlug } = req.params;
+    const updateData = req.body;
+
+    const updatedCategory = await Category.findOneAndUpdate(
+      {
+        slug: categorySlug,
+        "subCategories.slug": subCategorySlug,
+        "subCategories.services.slug": serviceSlug,
+      },
+      {
+        $set: {
+          "subCategories.$[subCat].services.$[service]": updateData,
+        },
+      },
+      {
+        arrayFilters: [
+          { "subCat.slug": subCategorySlug },
+          { "service.slug": serviceSlug },
+        ],
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!updatedCategory) {
+      return res.status(404).json({ message: "Service not found" });
+    }
+
+    res.status(200).json(updatedCategory);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error updating service", error: error.message });
   }
 };
 

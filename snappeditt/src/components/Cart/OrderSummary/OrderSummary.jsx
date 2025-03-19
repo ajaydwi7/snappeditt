@@ -1,49 +1,84 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useGlobalContext } from "@/components/GlobalContext/GlobalContext";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import "./OrderSummary.css";
 
 const OrderSummary = () => {
-  const { serviceStore, modal, auth } = useGlobalContext();
+  const { serviceStore, auth } = useGlobalContext();
   const {
     state: { cart, cartQuantity },
     clearCart,
   } = serviceStore;
-  const [deliveryType, setDeliveryType] = useState("Standard");
-  const [phone, setPhone] = useState("");
+  const [couponCode, setCouponCode] = useState("");
+  const [discount, setDiscount] = useState(0);
   const navigate = useNavigate();
 
-  const setDelivery = (type) => {
-    setDeliveryType(type);
+  // Update applyCoupon function
+  const applyCoupon = async () => {
+    if (!couponCode) {
+      toast.error("Please enter a coupon code");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/coupons/validate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: couponCode,
+          cartTotal: cartTotal
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Invalid coupon");
+      }
+
+      setDiscount(data.discount);
+      toast.success("Coupon applied successfully!");
+    } catch (error) {
+      setDiscount(0);
+      toast.error(error.message);
+    }
   };
 
-  const isValidPhoneNumber = (phone) => {
-    const phoneRegex = /^[0-9]{10}$/;
-    return phoneRegex.test(phone);
-  };
+  // Add useEffect to clear discount when cart changes
+  useEffect(() => {
+    setDiscount(0);
+    setCouponCode("");
+  }, [cart]);
+
+
+
 
   const proceedToCheckout = () => {
     if (!auth.state.user) {
       modal.openModal();
       return;
     }
-
-    if (!isValidPhoneNumber(phone)) {
-      toast.error("Please enter a valid phone number");
-      return;
-    }
-
-    const cartTotal = cart.reduce(
-      (total, item) => total + (item.finalPrice ?? item.basePrice) * item.quantity,
-      0
+    // Ensure numeric conversion
+    const numericCartTotal = Number(
+      cart.reduce(
+        (total, item) => total + (item.finalPrice ?? item.basePrice) * item.quantity,
+        0
+      )
     );
+
+    // const cartTotal = cart.reduce(
+    //   (total, item) => total + (item.finalPrice ?? item.basePrice) * item.quantity,
+    //   0
+    // );
 
     navigate("/checkout", {
       state: {
         cartItems: cart,
-        cartTotal,
+        cartTotal: numericCartTotal,
         userId: auth.state.user.id,
+        couponCode: discount > 0 ? couponCode : null,
+        discount,
       },
     });
   };
@@ -53,7 +88,7 @@ const OrderSummary = () => {
     (total, item) => total + (item.finalPrice ?? item.basePrice) * item.quantity,
     0
   );
-  const totalCost = cartTotal + (deliveryType === "Standard" ? 0 : 1);
+  const totalCost = cartTotal - discount;
 
   return (
     <div className="is-order-summary">
@@ -61,7 +96,7 @@ const OrderSummary = () => {
         <div className="contains-order">
           {/* Total Items */}
           <div className="total-cost">
-            <h4>Total Items ({cartQuantity})</h4>
+            <h4>Subtotal ({cartQuantity} items)</h4>
             <h4>${cartTotal.toFixed(2)}</h4>
           </div>
 
@@ -78,34 +113,29 @@ const OrderSummary = () => {
             ))}
           </div>
 
-          {/* Shipping Options */}
-          <div className="shipping">
-            <h4>Shipping</h4>
-            <select
-              className="select-dropdown"
-              onChange={(item) => setDelivery(item.target.value)}
-              value={deliveryType}
-            >
-              <option value="Standard">Standard</option>
-              <option value="Express">Express</option>
-            </select>
-          </div>
-
-          {/* Phone Number Input */}
-          <div className="promo-code">
-            <h4>Phone Number</h4>
-            <input
-              className="select-dropdown"
-              type="tel"
-              placeholder="Enter your phone number"
-              value={phone}
-              onChange={(item) => setPhone(item.target.value)}
-            />
-            <small>
-              <em style={{ color: "#ff2100" }}>
-                Your number will be used to verify the order placement.
-              </em>
-            </small>
+          {/* Coupon Code */}
+          <div className="coupon-section">
+            <h4>Coupon Code</h4>
+            <div className="coupon-input">
+              <input
+                type="text"
+                placeholder="Enter coupon code"
+                value={couponCode}
+                onChange={(e) => setCouponCode(e.target.value)}
+              />
+              <button
+                className="apply-coupon"
+                onClick={applyCoupon}
+                disabled={!couponCode}
+              >
+                Apply
+              </button>
+            </div>
+            {discount > 0 && (
+              <div className="discount-info">
+                <span>Discount Applied (-${discount.toFixed(2)})</span>
+              </div>
+            )}
           </div>
 
           {/* Final Total Cost */}

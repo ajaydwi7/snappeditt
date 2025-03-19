@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import ScrollToTopButton from "./components/GlobalComponents/ScrollToTopButton/ScrollToTopButton";
+import ScrollToTop from "./components/ScrollToTop/ScrollToTop";
 import HomeView from "./views/HomeView";
 import AboutView from "./views/AboutView";
 import NavBar from "@/components/NavBar/NavBar";
@@ -11,8 +12,6 @@ import DeliveryView from "./views/DeliveryView";
 import "react-loading-skeleton/dist/skeleton.css";
 import { useGlobalContext } from "@/components/GlobalContext/GlobalContext";
 import { ToastContainer } from "react-toastify";
-import Modal from "@/components/Modals/Modal";
-import CancelOrder from "@/components/Modals/CancelOrder";
 import "react-toastify/dist/ReactToastify.css";
 import Loader from "@/components/GlobalComponents/Loader/Loader";
 import RealStateView from "./views/Services/RealStateView";
@@ -23,18 +22,25 @@ import PeopleRetouchingView from "./views/Services/PeopleRetouchingView";
 import ClippingPathExtractionView from "./views/Services/ClippingPathExtractionView";
 import ContactUsView from "./views/ContactUsView";
 import ServicePage from "./components/OurServices/RealState/ServicePage";
-import Login from "./views/Login";
-import Register from "./views/Register";
+import ForgotPassword from "./components/Authentication/ForgotPassword";
+import ResetPassword from "./components/Authentication/ResetPassword";
 import Checkout from "./components/Checkout/Checkout";
-
-import AdminDashboard from "./admin/pages/AdminDashboard";
-import CustomPaymentService from "./views/Services/CustomPaymentService";
+import CustomPaymentServiceView from "./views/Services/CustomPaymentServiceView";
 import UserProfile from "./views/ProfileView";
+import PaymentForm from "./components/GlobalComponents/PaymentForm/PaymentForm";
+import PrivacyPolicy from "./views/PrivacyPolicy";
+import SignIn from "./components/Authentication/SignIn";
+import SignUp from "./components/Authentication/Signup";
 // import RequestCookie from "./components/CookieBanner/CookieBanner";
+
+const ProtectedRoute = ({ children }) => {
+  const { auth } = useGlobalContext();
+  return auth.state.user ? children : <Navigate to="/login" replace />;
+};
 
 function App() {
   const [loading, setLoading] = useState(true); // Add loader state
-  const { orders, modal, auth } = useGlobalContext(); // Access auth context to check user role
+  const { orders, auth } = useGlobalContext(); // Access auth context to check user role
 
   /// Add a minimum loading time
   const MIN_LOADING_TIME = 1000; // 2 seconds
@@ -78,12 +84,21 @@ function App() {
           <header>
             <NavBar />
           </header>
-
+          <ScrollToTop />
           <Routes>
             <Route path="/" element={<HomeView />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/user" element={<UserProfile />} />
+            <Route path="/login" element={<SignIn />} />
+            <Route path="/register" element={<SignUp />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
+            <Route
+              path="/user"
+              element={
+                <ProtectedRoute>
+                  <UserProfile />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/about-us" element={<AboutView />} />
             <Route path="/services/real-estate" element={<RealStateView />} />
             <Route path="services/:categorySlug/:serviceSlug" element={<ServicePage />} />
@@ -92,12 +107,17 @@ function App() {
             <Route path="/services/products-ecommerce" element={<ProductECommerceView />} />
             <Route path="/services/people-retouching" element={<PeopleRetouchingView />} />
             <Route path="/services/clipping-path-extraction" element={<ClippingPathExtractionView />} />
-            <Route path="/services/custom-payment-service" element={<CustomPaymentService />} />
+            <Route path="/services/custom-payment-service" element={<CustomPaymentServiceView />} />
+            <Route
+              path="payment-form"
+              element={<PaymentForm />}
+            />
             <Route path="/contact-us" element={<ContactUsView />} />
             <Route path="/cart" element={<CartView />} />
-            <Route path="/delivery" element={<DeliveryView />} />
+            <Route path="/orders" element={<DeliveryView />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="*" element={<ErrorView />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           </Routes>
           <footer>
             <ShopFooter />
@@ -106,7 +126,7 @@ function App() {
       )}
 
       {/* Display Modal when needed */}
-      {modal.opened && (
+      {/* {modal.opened && (
         <Modal
           header={modal.isRegister ? "Create Account" : "Login"}
           submitAction={() => { }}
@@ -117,9 +137,9 @@ function App() {
             navigate("/"); // Navigate to home or desired route
           }}
         />
-      )}
+      )} */}
       {/* Display CancelOrder modal when required */}
-      {modal.isCancelModal && <CancelOrder />}
+      {/* {modal.isCancelModal && <CancelOrder />} */}
 
       <ToastContainer />
       {/* Uncomment this if you want to show the cookie banner */}

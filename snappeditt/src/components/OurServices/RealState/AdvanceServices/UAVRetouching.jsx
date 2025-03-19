@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import ImageComparisonSlider from '@/components/GlobalComponents/ImageComparisonSlider/ImageComparisonSlider';
+import { Link } from 'react-router-dom';
+import { CircleCheck, CircleX } from "lucide-react";
 
 const UAVRetouching = () => {
   const service = {
     title: "UAV Retouching",
     price: "$1.50/Image",
     description: "With the help of our aerial photo editing services, we create appealing images that stand out from the competitors and clearly depicts all the information about the property. Use this at Real Estate home page",
+    addToCartBtn: '/services/real-estate/uav-retouching',
     features: [
       { name: 'Wires & Cords Removal', included: true },
       { name: 'Photographers & Tripod Reflection Removal', included: true },
@@ -62,12 +65,16 @@ const UAVRetouching = () => {
           <div className="content-area">
             <h4 className='content-area-title'>{service.title}</h4>
             <p className="price">{service.price}</p>
-            <button className="add-to-cart-btn">Add to Cart</button>
-            <button className="details-btn">More Details</button>
+            <button className="add-to-cart-btn"><Link to={service.addToCartBtn} className='
+              text-black'> Add to Cart</Link></button>
+            <button className="details-btn"><Link to={service.addToCartBtn} className='
+              text-black'> More Details</Link></button>
             <p className="description">{service.description}</p>
             <ul className="features-list">
               {service.features.map((feature, index) => (
-                <li key={index}>{feature.name}</li>
+                <li key={index}>
+                  <span className='pr-1'>{feature.included ? <CircleCheck className='text-green-500' /> : <CircleX className='text-primaryRed' />}</span> {feature.name}
+                </li>
               ))}
             </ul>
           </div>

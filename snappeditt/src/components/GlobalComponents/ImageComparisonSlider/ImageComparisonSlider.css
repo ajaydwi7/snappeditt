@@ -74,3 +74,26 @@
   height: 100%;
   cursor: pointer;
 }
+
+/* ImageComparisonSlider.css */
+@media (max-width: 768px) {
+  .comparison-image-slider {
+    border-radius: 8px;
+    /* height: 300px; */
+  }
+
+  .handle-circle {
+    width: 40px;
+    height: 40px;
+  }
+
+  .dots {
+    padding: 15px 0;
+  }
+
+  .dot {
+    width: 16px;
+    height: 16px;
+    margin: 0 8px;
+  }
+}

@@ -9,7 +9,8 @@ const Checkout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { serviceStore, orders } = useGlobalContext();
-  const cart = serviceStore.state?.cart || [];
+  const cart = serviceStore.state?.cart || 0;
+  // const cartTotal = location.state.cartTotal || 0;
   const { clearCart } = serviceStore;
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -22,10 +23,6 @@ const Checkout = () => {
     zip: "",
     phone: "",
   });
-
-  // useEffect(() => {
-  //   console.log("Updated billingDetails:", billingDetails);
-  // }, [billingDetails]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -61,12 +58,62 @@ const Checkout = () => {
       // Clear cart and navigate
       await clearCart(location.state.userId);
       toast.success("Order placed successfully!");
-      navigate("/delivery");
+      navigate("/orders");
     } catch (error) {
       console.error("Post-payment error:", error);
       toast.error(error.message.includes("Invalid")
         ? "Order completed but invalid data received"
         : "Order completed but cart cleanup failed");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleFreeOrder = async () => {
+    if (!validateBillingDetails()) return;
+
+    try {
+      setIsSubmitting(true);
+
+      const orderData = {
+        user_id: location.state.userId,
+        items: cart.map(item => ({
+          serviceId: item.serviceId,
+          serviceName: item.serviceName,
+          basePrice: item.basePrice,
+          finalPrice: item.finalPrice,
+          quantity: item.quantity,
+          featureImage: item.featureImage,
+          selectedVariations: item.selectedVariations,
+          formData: item.formData
+        })),
+        totalCost: 0,
+        billingDetails,
+        couponCode: location.state?.couponCode || null,
+        discount: location.state?.discount || 0,
+        // Explicitly omit paypalOrderId
+      };
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/order/confirm`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include", // Add if using cookies/auth
+        body: JSON.stringify(orderData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to place order");
+      }
+
+      const data = await response.json();
+      orders.addOrder(data.order);
+      await clearCart(location.state.userId);
+      toast.success("Order placed successfully!");
+      navigate("/orders");
+    } catch (error) {
+      console.error("Full error details:", error);
+      toast.error(error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -129,7 +176,7 @@ const Checkout = () => {
                 <div className="flex justify-between items-center">
                   <span className="font-medium text-gray-600">Total:</span>
                   <span className="text-2xl font-bold text-blue-600">
-                    ${location.state.cartTotal.toFixed(2)}
+                    ${Number(location.state.cartTotal || 0).toFixed(2)}
                   </span>
                 </div>
               </div>
@@ -175,7 +222,7 @@ const Checkout = () => {
                 <FiCreditCard className="text-green-600" />
                 Payment Method
               </h2>
-              {location.state.cartTotal > 0 && validateBillingDetails() ? (
+              {location.state.cartTotal > 0 ? validateBillingDetails() ? (
                 <div className="animate-fade-in">
                   <PayPalButton
                     cartTotal={location.state.cartTotal}
@@ -185,12 +232,22 @@ const Checkout = () => {
                     phoneNumber={billingDetails.phone}
                     userId={location.state.userId}
                     billingDetails={billingDetails}
+                    couponCode={location.state?.couponCode || null}
+                    discount={location.state?.discount || 0}
                   />
                 </div>
               ) : (
                 <div className="text-center p-4 bg-yellow-50 rounded-lg text-yellow-700">
                   Complete all billing details to enable payment
                 </div>
+              ) : (
+                <button
+                  onClick={handleFreeOrder}
+                  disabled={!validateBillingDetails() || isSubmitting}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? "Processing..." : "Place Order"}
+                </button>
               )}
             </section>
           </div>

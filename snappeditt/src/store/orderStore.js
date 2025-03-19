@@ -94,7 +94,11 @@ const useOrderStore = () => {
             "Content-Type": "application/json",
           },
           credentials: "include",
-          body: JSON.stringify(orderData),
+          body: JSON.stringify({
+            ...orderData,
+            couponCode: orderData.couponCode || null,
+            discount: orderData.discount || 0,
+          }),
         }
       );
       const data = await response.json();

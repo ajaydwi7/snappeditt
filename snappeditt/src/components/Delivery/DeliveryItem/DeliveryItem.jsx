@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaCaretUp } from "react-icons/fa";
+import { FaCaretUp, FaDownload } from "react-icons/fa";
 import { useGlobalContext } from "../../GlobalContext/GlobalContext";
 import Pagination from "../../GlobalComponents/Pagination/Pagination";
 import "./DeliveryItem.css";
@@ -125,7 +125,19 @@ const DeliveryItem = ({ order: initialOrder }) => {
                 <div className="delivery-items">
                   <h5>Item Count: {order.items.length}</h5>
                   <h5>Total Cost: ${order.totalCost}</h5>
-                  <h5>Delivery Type: {order.deliveryType}</h5>
+                  <h5>
+                    Payment Status:{" "}
+                    <span
+                      className={`flair ${order.paymentStatus === "Completed"
+                        ? "success-flair"
+                        : order.paymentStatus === "Pending"
+                          ? "warning-flair"
+                          : "danger-flair"
+                        }`}
+                    >
+                      {order.paymentStatus}
+                    </span>
+                  </h5>
                 </div>
               </div>
               <div className="delivery-progress">
@@ -154,6 +166,12 @@ const DeliveryItem = ({ order: initialOrder }) => {
                   <h4>{calculateRemainingDays()} day(s)</h4>
                 )}
               </div>
+              {order.couponCode && (
+                <div className="coupon-display">
+                  <h5>Coupon Applied: {order.couponCode}</h5>
+                  <h5>Discount: -${order.discountApplied?.toFixed(2)}</h5>
+                </div>
+              )}
             </div>
             <div className={expanded ? "fully-expanded isExpanded" : "fully-expanded"}>
               <div className="services-in-delivery">
@@ -166,6 +184,18 @@ const DeliveryItem = ({ order: initialOrder }) => {
                       <h5>Description: {service.serviceDescription}</h5>
                       <h5>Price: ${service.finalPrice}/Image</h5>
                       <h5>Quantity: {service.quantity}</h5>
+                      {/* Add Selected Variations */}
+                      {service.selectedVariations?.length > 0 && (
+                        <div className="selected-variations">
+                          <h6>Selected Options:</h6>
+                          {service.selectedVariations.map((variation, index) => (
+                            <div key={index} className="variation-item">
+                              <span className="variation-type">{variation.variationType}:</span>
+                              <span className="variation-option">{variation.optionName}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                       {service.formData && (
                         <div className="form-data">
                           <h6>Order Details:</h6>
@@ -193,13 +223,25 @@ const DeliveryItem = ({ order: initialOrder }) => {
             </button>
           </div>
           {order.status !== "Cancelled" && (
-            <button
-              className="btn-cancel mt-2 bg-red-500 text-white rounded px-4 py-2"
-              onClick={handleCancelOrder}
-              disabled={cancelling}
-            >
-              {cancelling ? "Cancelling..." : "Cancel Order"}
-            </button>
+            <div className="flex items-center gap-2 mt-2">
+              <button
+                className="btn-cancel bg-red-500 text-white rounded px-4 py-2"
+                onClick={handleCancelOrder}
+                disabled={cancelling}
+              >
+                {cancelling ? "Cancelling..." : "Cancel Order"}
+              </button>
+
+              <a
+                href={`${import.meta.env.VITE_API_URL}/order/${order._id}/invoice`}
+                download
+                className="flex flex-col items-center hover:text-yellow-600 transition-colors"
+                title="Download invoice"
+              >
+                <FaDownload className=" text-primaryRed w-5 h-5" />
+                <span className=" text-primaryBlack text-xs mt-0.5">Invoice</span>
+              </a>
+            </div>
           )}
         </>
       )}

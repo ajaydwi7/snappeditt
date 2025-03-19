@@ -33,13 +33,9 @@
 }
 .info-section {
   background-color: #f44336;
-  padding: 1rem;
-  margin-bottom: 1rem;
+  /* padding: 1rem;
+  margin-bottom: 1rem; */
   position: relative;
-}
-.services-section {
-  padding: 1rem;
-  margin-bottom: 1rem;
 }
 
 .timeline-section {
@@ -51,11 +47,6 @@
   color: white;
 }
 
-.testomonials-section {
-  padding: 1rem;
-  margin-bottom: 1rem;
-}
-
 .products-section {
   background-color: #f9f9f9;
   padding: 1rem;
@@ -65,33 +56,33 @@
 .about-banner {
   background-color: #f0f8ff;
   padding: 1rem;
-  margin-bottom: 1rem;
 }
 
 .missonVission {
   background-color: #dfdfdfef;
   padding: 1rem;
-  margin-bottom: 1rem;
+}
+#missionVision {
+  scroll-margin-top: 100px; /* Adjust based on header height */
 }
 .our-values {
   background-color: #f0f8ff;
   padding: 1rem;
-  margin-bottom: 1rem;
 }
 
 .why-choose-us {
   padding: 1rem;
-  margin-bottom: 1rem;
 }
 
 .image-gallery {
   padding: 1rem;
-  margin-bottom: 1rem;
 }
 
 .packages-section {
   padding: 1rem;
-  margin-bottom: 1rem;
+}
+#packages {
+  scroll-margin-top: 100px; /* Adjust based on header height */
 }
 .advance-section {
   padding: 1rem;
@@ -127,4 +118,37 @@ a {
 
 html {
   scroll-behavior: smooth;
+}
+/* Add to main.css */
+.no-scroll {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
+@media (hover: hover) {
+  .links a:hover,
+  .services-button:hover {
+    color: #f44336;
+  }
+}
+
+.submenu a.active {
+  transform: scale(0.98);
+  opacity: 0.8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .submenu,
+  .submenu a,
+  .services-button::after {
+    transition: none !important;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .sub-container {
+    width: 100%;
+  }
 }

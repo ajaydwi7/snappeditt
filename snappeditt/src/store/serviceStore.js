@@ -1,6 +1,6 @@
 import { useReducer, useEffect } from "react";
 import { toast } from "react-toastify";
-import { getUserFromLocalStorage } from "../helpers/checkExpiration"; // Adjust path as needed
+import { getUserFromLocalStorage } from "../helpers/checkExpiration";
 
 const initialState = {
   cart: [],
@@ -46,40 +46,32 @@ const useServiceStore = () => {
   useEffect(() => {
     const user = getUserFromLocalStorage();
     if (user && user.id) {
-      fetchCart(user.id); // Fetch the cart from the server on page load
+      fetchCart(user.id);
     }
   }, []);
 
   const fetchCart = async (userId) => {
     try {
+      if (!/^[0-9a-fA-F]{24}$/.test(userId)) {
+        console.error("Invalid user ID format");
+        return;
+      }
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/cart/${userId}`
       );
-
-      // Handle 404 response (cart not found)
       if (response.status === 404) {
         dispatch({
           type: actions.LOAD_CART,
-          payload: {
-            cart: [],
-            cartTotal: 0,
-            cartQuantity: 0,
-          },
+          payload: { cart: [], cartTotal: 0, cartQuantity: 0 },
         });
         return;
       }
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch cart");
-      }
-
+      if (!response.ok) throw new Error("Failed to fetch cart");
       const data = await response.json();
-
-      // Update state with fetched cart data
       dispatch({
         type: actions.LOAD_CART,
         payload: {
-          cart: data.items || [], // Updated to use `items` instead of `services`
+          cart: data.items || [],
           cartTotal: data.cartTotal,
           cartQuantity: data.cartQuantity,
         },
@@ -93,29 +85,23 @@ const useServiceStore = () => {
   const addToCart = async (item) => {
     try {
       const user = getUserFromLocalStorage();
-
       if (!user || !user.id) {
         toast.error("You must be logged in to add items to the cart.");
         return;
       }
-
-      // Ensure finalPrice is properly calculated before sending to API
+      // Verify valid user ID format
+      if (!/^[0-9a-fA-F]{24}$/.test(user.id)) {
+        toast.error("Invalid user session. Please relogin.");
+        return;
+      }
 
       const response = await fetch(`${import.meta.env.VITE_API_URL}/cart/add`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: user.id,
-          item,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id, item }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to add item to cart");
-      }
-
+      if (!response.ok) throw new Error("Failed to add item to cart");
       const updatedCart = await response.json();
 
       dispatch({

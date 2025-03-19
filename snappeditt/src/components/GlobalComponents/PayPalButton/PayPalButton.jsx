@@ -2,18 +2,23 @@ import React from "react";
 import { PayPalButtons } from "@paypal/react-paypal-js";
 import { toast } from "react-toastify";
 
-const PayPalButton = ({ cartTotal, cartItems, onSuccess, disabled, userId, phoneNumber, billingDetails }) => {
+const PayPalButton = ({ cartTotal, cartItems, onSuccess, disabled, userId, billingDetails, couponCode, discount }) => {
   const createOrder = async () => {
     try {
+
+
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+      // Convert to number first before formatting
+      const numericTotal = Number(cartTotal) || 0;
+      const formattedTotal = numericTotal.toFixed(2);
       const response = await fetch(`${apiUrl}/paypal/create-order`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          orderTotal: cartTotal.toFixed(2),
+          orderTotal: numericTotal,
           items: cartItems.map((item) => ({
             name: item.serviceName || "Unnamed Service",
-            unit_amount: { currency_code: "USD", value: (parseFloat(item.finalPrice ?? item.basePrice)).toFixed(2), },
+            unit_amount: { currency_code: "USD", value: (parseFloat(item.finalPrice ?? item.basePrice) || 0).toFixed(2), },
             quantity: parseInt(item.quantity, 10) || 1,
           })),
         }),
@@ -51,7 +56,10 @@ const PayPalButton = ({ cartTotal, cartItems, onSuccess, disabled, userId, phone
         throw new Error(errorData.error || "Failed to capture payment");
       }
       // Validate cart items before saving
-      if (!cartItems.every(item => item.basePrice && item.finalPrice)) {
+      if (!cartItems.every(item =>
+        Number.isFinite(item.basePrice) &&
+        Number.isFinite(item.finalPrice)
+      )) {
         throw new Error("Invalid price configuration in cart items");
       }
 
@@ -59,9 +67,7 @@ const PayPalButton = ({ cartTotal, cartItems, onSuccess, disabled, userId, phone
       if (captureData.status === "COMPLETED") {
         const orderDetails = {
           user_id: userId,
-          deliveryType: "Standard",
-          phoneNumber,
-          totalCost: cartTotal,
+          totalCost: Number(cartTotal || 0).toFixed(2),
           paypalOrderId: captureData.id,
           billingDetails,
           items: cartItems.map((item) => ({
@@ -75,6 +81,10 @@ const PayPalButton = ({ cartTotal, cartItems, onSuccess, disabled, userId, phone
             formData: item.formData || {},
             selectedVariations: item.selectedVariations || [],
           })),
+          couponCode: couponCode || null,
+          discount: discount || 0,
+          paymentStatus: 'Completed',
+          invoiceUrl: captureData.invoiceUrl || `/api/order/${captureData.id}/invoice`
         };
 
 
@@ -84,6 +94,7 @@ const PayPalButton = ({ cartTotal, cartItems, onSuccess, disabled, userId, phone
           body: JSON.stringify(orderDetails),
           credentials: "include",
         });
+
 
         if (!saveOrderResponse.ok) {
           const errorData = await saveOrderResponse.json();

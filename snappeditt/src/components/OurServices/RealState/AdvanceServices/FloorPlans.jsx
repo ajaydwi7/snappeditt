@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
+import { CircleCheck, CircleX } from "lucide-react";
 
 const FloorPlan = () => {
   const service = {
     title: "Floor Plans",
     price: "$10.00 – $18.00/Floor",
     description: "Present your buyers with Floor Plans that engages them more with the property. Our professional and experienced team can create a 2D/3D floor plan for you based on the rough sketch and detailed measurements. Below are the types of floor plans.",
+    addToCartBtn: '/services/real-estate/2d-3d-floor-plans',
     features: [
       { name: '2D Black and White floor plan', included: true },
       { name: '2D Black and White floor plan with Furniture', included: true },
@@ -82,12 +85,17 @@ const FloorPlan = () => {
           <div className="content-area">
             <h4 className='content-area-title'>{service.title}</h4>
             <p className="price">{service.price}</p>
-            <button className="add-to-cart-btn">Add to Cart</button>
-            <button className="details-btn">More Details</button>
+            <button className="add-to-cart-btn"><Link to={service.addToCartBtn} className='
+              text-black'> Add to Cart</Link></button>
+            <button className="details-btn">
+              <Link to={service.addToCartBtn} className='
+              text-black'> More Details</Link></button>
             <p className="description">{service.description}</p>
             <ul className="features-list">
               {service.features.map((feature, index) => (
-                <li key={index}>{feature.name}</li>
+                <li key={index}>
+                  <span className='pr-1'>{feature.included ? <CircleCheck className='text-green-500' /> : <CircleX className='text-primaryRed' />}</span> {feature.name}
+                </li>
               ))}
             </ul>
           </div>

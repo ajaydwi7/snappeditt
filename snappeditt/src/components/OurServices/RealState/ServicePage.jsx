@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
-import { useGlobalContext } from "@/components/GlobalContext/GlobalContext"; // Use Global Context
+// import axios from "axios";
+import { useGlobalContext } from "@/components/GlobalContext/GlobalContext";
 import ServiceForm from "@/components/GlobalComponents/ServiceForm/ServiceForm";
 import ImageComparisonSlider from "@/components/GlobalComponents/ImageComparisonSlider/ImageComparisonSlider";
-import { toast } from "react-toastify"; // Import toast for notifications
+import { toast } from "react-toastify";
+import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 
 const ServicePage = () => {
   const { categorySlug, serviceSlug } = useParams();
@@ -19,13 +20,52 @@ const ServicePage = () => {
   const { serviceStore } = useGlobalContext();
   const { addToCart, state: { cart } } = serviceStore;
 
+
+
+  useEffect(() => {
+    if (service?.images) {
+      service.images.forEach((imagePair) => {
+        const preloadBefore = new Image();
+        preloadBefore.src = imagePair.before;
+        if (imagePair.after) {
+          const preloadAfter = new Image();
+          preloadAfter.src = imagePair.after;
+        }
+      });
+    }
+  }, [service]);
+
+  // Updated active slider preload
+  useEffect(() => {
+    if (service?.images?.[activeSlider]) {
+      const imgBefore = new Image();
+      imgBefore.src = service.images[activeSlider].before;
+      if (service.images[activeSlider].after) {
+        const imgAfter = new Image();
+        imgAfter.src = service.images[activeSlider].after;
+      }
+    }
+  }, [activeSlider, service?.images]);
+
   useEffect(() => {
     const fetchService = async () => {
+      console.log("Fetching data from:", `${import.meta.env.VITE_API_URL}/services/${categorySlug}/${serviceSlug}`);
       try {
-        const response = await axios.get(`/api/services/${categorySlug}/${serviceSlug}`);
-        const fetchedService = response.data;
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/services/${categorySlug}/${serviceSlug}`);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const fetchedService = await response.json();
+
+        if (!fetchedService) {
+          throw new Error("Empty service data received.");
+        }
+
         setService(fetchedService);
-        loadFormConfig(fetchedService);
+        loadFormConfig(fetchedService); // Ensure form fields are loaded
+
       } catch (err) {
         setError("Error fetching service data. Please try again later.");
         console.error("Service fetch error:", err);
@@ -37,8 +77,21 @@ const ServicePage = () => {
     fetchService();
   }, [categorySlug, serviceSlug]);
 
+
+  // Auto-select single-option required variations
+  useEffect(() => {
+    if (service?.variationTypes) {
+      const autoSelections = {};
+      service.variationTypes.forEach(vt => {
+        if (vt.options.length === 1 && vt.required) {
+          autoSelections[vt.name] = vt.options[0];
+        }
+      });
+      setSelectedVariations(autoSelections);
+    }
+  }, [service]);
+
   const loadFormConfig = (service) => {
-    // Example dynamic form configuration
     const config = [
       {
         name: "Order name",
@@ -66,47 +119,39 @@ const ServicePage = () => {
   };
 
   const handleVariationSelect = (variationType, option) => {
-    setSelectedVariations((prev) => ({
+    setSelectedVariations(prev => ({
       ...prev,
       [variationType.name]: option,
-
     }));
   };
 
-  const clearVariationSelection = (variationTypeName) => {
-    setSelectedVariations(prev => {
-      const newState = { ...prev };
-      delete newState[variationTypeName];
-      return newState;
-    });
-  };
-
+  // In the calculatePrice function, add null checks
+  // Update price calculation to use names temporarily
   const calculatePrice = () => {
     if (!service) return 0;
 
-    // If no variation types, use base price
-    if (service.variationTypes.length === 0) return service.basePrice;
-
-    const selectedIds = Object.values(selectedVariations)
+    const selectedNames = Object.values(selectedVariations)
       .filter(v => v)
-      .map(v => v._id.toString());
+      .map(v => v.name);
 
-    // Find the correct price combination
     const combination = service.priceCombinations.find(pc =>
-      pc.combination.every(id => selectedIds.includes(id.toString())) &&
-      pc.combination.length === selectedIds.length
+      pc.combination.length === selectedNames.length &&
+      pc.combination.every(name => selectedNames.includes(name))
     );
 
     return combination ? combination.price : service.basePrice;
   };
 
-
   const handleAddToCart = () => {
     if (!service) return;
 
-    // Validate required variations
-    const requiredVariations = service.variationTypes.filter((vt) => vt.required);
-    const missingVariations = requiredVariations.some((vt) => !selectedVariations[vt.name]);
+    // Validate required variations (including auto-selected ones)
+    const requiredVariations = service.variationTypes.filter(vt => vt.required);
+    const missingVariations = requiredVariations.some(vt => {
+      const hasSelection = selectedVariations[vt.name] ||
+        (vt.options.length === 1 && vt.required);
+      return !hasSelection;
+    });
 
     if (missingVariations) {
       toast.error("Please select all required options");
@@ -114,39 +159,31 @@ const ServicePage = () => {
     }
 
     // Validate form data
-    const requiredFormFields = formConfig.filter((field) => field.required);
-    const missingFormFields = requiredFormFields.some((field) => !formData[field.name]);
+    const missingFormFields = formConfig
+      .filter(field => field.required)
+      .some(field => !formData[field.name]);
 
     if (missingFormFields) {
       toast.error("Please fill all required fields");
       return;
     }
 
-    // Calculate the correct price before sending to `addToCart`
-    const selectedIds = Object.values(selectedVariations)
-      .filter((v) => v)
-      .map((v) => v._id.toString());
+    // Prepare cart item with all selections
+    const finalSelections = { ...selectedVariations };
+    service.variationTypes?.forEach(vt => {
+      if (vt.options.length === 1 && vt.required) {
+        finalSelections[vt.name] = vt.options[0];
+      }
+    });
 
-    let finalPrice = service.basePrice;
-
-    if (service.variationTypes.length > 0) {
-      const combination = service.priceCombinations.find(pc =>
-        pc.combination.every(id => selectedIds.includes(id.toString())) &&
-        pc.combination.length === selectedIds.length
-      );
-
-      finalPrice = combination ? combination.price : service.basePrice;
-    }
-
-    // ServicePage.jsx - Update cartItem structure
     const cartItem = {
       serviceId: service._id,
       serviceName: service.name,
-      basePrice: service.basePrice, // Ensure this is included
-      finalPrice: finalPrice,
+      basePrice: service.basePrice,
+      finalPrice: calculatePrice(),
       quantity: parseInt(formData.quantity),
       featureImage: service.featureImage,
-      selectedVariations: Object.entries(selectedVariations).map(([type, option]) => ({
+      selectedVariations: Object.entries(finalSelections).map(([type, option]) => ({
         variationType: type,
         optionId: option._id,
         optionName: option.name
@@ -158,8 +195,7 @@ const ServicePage = () => {
     toast.success(`${service.name} added to cart!`);
   };
 
-
-  const isInCart = cart.some((item) => item.serviceId === service?._id);
+  const isInCart = cart?.some(item => item.serviceId === service?._id);
 
   if (loading) {
     return (
@@ -184,93 +220,149 @@ const ServicePage = () => {
       <div className="flex flex-col md:flex-row">
         <div className="flex-1 md:mr-4">
           <div className="relative">
-            {service.images[activeSlider] && (
-              <ImageComparisonSlider
-                beforeImage={service.images[activeSlider].before}
-                afterImage={service.images[activeSlider].after}
-              />
+            {service?.images?.map((image, index) => (
+              <div
+                key={index}
+                className={`${index === activeSlider ? 'block' : 'hidden'}`}
+              >
+                {image.after ? (
+                  // Show comparison slider if after image exists
+                  <ImageComparisonSlider
+                    beforeImage={image.before}
+                    afterImage={image.after}
+                  />
+                ) : (
+                  // Show single image if only before exists
+                  <img
+                    src={image.before}
+                    alt="Service preview"
+                    className="w-full h-auto object-cover"
+                  />
+                )}
+              </div>
+            ))}
+
+            {/* Navigation controls */}
+            {service?.images?.length > 1 && (
+              <>
+                <FaArrowLeft
+                  onClick={() => setActiveSlider(prev =>
+                    (prev - 1 + service.images.length) % service.images.length
+                  )}
+                  className="absolute top-1/2 left-4 transform -translate-y-1/2 cursor-pointer text-white bg-black/50 rounded-full p-1 hover:bg-black/80 transition-colors"
+                  size={30}
+                />
+                <FaArrowRight
+                  onClick={() => setActiveSlider(prev =>
+                    (prev + 1) % service.images.length
+                  )}
+                  className="absolute top-1/2 right-4 transform -translate-y-1/2 cursor-pointer text-white bg-black/50 rounded-full p-1 hover:bg-black/80 transition-colors"
+                  size={30}
+                />
+
+                {/* Dots indicator */}
+                <div className="flex justify-center mt-4 space-x-2">
+                  {service.images.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setActiveSlider(index)}
+                      className={`w-4 h-4 rounded-full ${activeSlider === index ? "bg-primaryRed" : "bg-gray-300"
+                        }`}
+                    ></button>
+                  ))}
+                </div>
+              </>
             )}
-            <div className="flex justify-center mt-4 space-x-2">
-              {service.images.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setActiveSlider(index)}
-                  className={`w-4 h-4 rounded-full ${activeSlider === index ? "bg-primaryRed" : "bg-gray-300"
-                    }`}
-                ></button>
-              ))}
-            </div>
           </div>
           <div className="mt-4">
-            <p className="text-gray-600">{service.description}</p>
-            <p className="text-grey-600 mt-6 mb-4">Features:</p>
-            <ul className="list-disc pl-6 space-y-2">
-              {service.features.map((feature, index) => (
-                <li key={index} className="text-gray-700">
+            {service.description ? (
+              service.description.split("\n\n").map((paragraph, index) => (
+                <p key={index} style={{ marginBottom: "20px" }} className="text-black">
+                  {paragraph}
+                </p>
+              ))
+            ) : (
+              <p className="text-black"></p>
+            )}
+
+            <ol className="list-decimal pl-6 space-y-2">
+              {service?.features?.map((feature, index) => (
+                <li key={index} className="text-black">
                   {feature.name}
                 </li>
               ))}
-            </ul>
+            </ol>
           </div>
         </div>
 
         {/* Details Section */}
         <div className="flex-1 bg-white p-6 rounded-lg shadow-lg border border-gray-300">
-          <h1 className="text-4xl font-md text-primaryRed font-cursive capitalize ">{service.name}</h1>
-          <p className="text-3xl font-bold text-gray-800 mt-4 font-secondry">
-            ${service.basePrice.toFixed(2)}
+          <h1 className="text-4xl font-md text-primaryRed font-cursive capitalize">
+            {service.name}
+          </h1>
+
+          {/* Price Display */}
+          <p className="text-4xl font-normal text-black mt-4 font-secondry">
+            {service?.priceRange ? (
+              service.priceRange.min === service.priceRange.max ? (
+                `$${(service.priceRange.min || 0).toFixed(2)}`
+              ) : (
+                `$${(service.priceRange.min || 0).toFixed(2)} - $${(service.priceRange.max || 0).toFixed(2)}`
+              )
+            ) : (
+              `$${(service?.basePrice || 0).toFixed(2)}`
+            )}
           </p>
 
-          {/* Updated Variations Section */}
+          {/* Variations Section */}
           <div className="bg-gray-100 p-5 mt-4 mb-4">
-            {service.variationTypes?.map((variationType) => (
+            {service?.variationTypes?.map(variationType => (
               <div key={variationType._id} className="mt-6">
                 <div className="flex items-center mb-4">
-                  <h2 className="text-md font-bold mr-4">{variationType.name}:</h2>
+                  <h2 className="text-sm font-semibold mr-4">{variationType.name}</h2>
                   <div className="flex flex-wrap gap-4">
-                    {variationType.options.map((option) => (
-                      <button
-                        key={option._id}
-                        onClick={() => handleVariationSelect(variationType, option)}
-                        className={`py-2 px-4 rounded-md border ${selectedVariations[variationType.name]?._id === option._id
-                          ? "border-primaryRed text-black"
-                          : "border-gray-300 hover:border-gray-500"
-                          }`}
-                      >
-                        {option.name}
-                      </button>
+                    {(variationType.options || []).map(option => (
+                      variationType.options.length === 1 ? (
+                        <div
+                          key={option._id}
+                          className="py-2 px-4 rounded-sm border border-gray-500 bg-white"
+                        >
+                          {option.name}
+                          <span className="ml-2 text-sm text-gray-500">
+                          </span>
+                        </div>
+                      ) : (
+                        <button
+                          key={option._id}
+                          onClick={() => handleVariationSelect(variationType, option)}
+                          className={`py-2 px-4 rounded-sm border ${selectedVariations[variationType.name]?._id === option._id
+                            ? "border-primaryRed text-black bg-white"
+                            : "border-gray-300 hover:border-gray-500 bg-white"
+                            }`}
+                        >
+                          {option.name}
+                        </button>
+                      )
                     ))}
                   </div>
                 </div>
 
-                {selectedVariations[variationType.name] && (
-                  <p className="text-gray-700 mt-2 mb-4">
-                    Selected:{" "}
-                    <span className="font-md">
-                      {selectedVariations[variationType.name].name}
-                    </span>{" "}
-                    -{" "}
-                    <span>
-                      {selectedVariations[variationType.name].description}
+                {variationType.options.length > 1 && selectedVariations[variationType.name] && (
+                  <div className="text-gray-700 mt-2 mb-4">
+                    <span className="font-medium">
+                      Selected: {selectedVariations[variationType.name].name}
                     </span>
-
-
-                    <span
-                      onClick={() => clearVariationSelection(variationType.name)}
-                      className="text-primaryRed cursor-pointer hover:underline ml-4"
+                    <button
+                      onClick={() => setSelectedVariations(prev => {
+                        const newState = { ...prev };
+                        delete newState[variationType.name];
+                        return newState;
+                      })}
+                      className="text-primaryRed hover:underline ml-4"
                     >
                       Clear
-                    </span>
-
-                    {/* Show price adjustment only if it exists and is not zero */}
-                    {selectedVariations[variationType.name].priceAdjustment &&
-                      selectedVariations[variationType.name].priceAdjustment !== 0 && (
-                        <span className="ml-2">
-                          (+${selectedVariations[variationType.name].priceAdjustment.toFixed(2)})
-                        </span>
-                      )}
-
-                  </p>
+                    </button>
+                  </div>
                 )}
               </div>
             ))}
@@ -284,16 +376,16 @@ const ServicePage = () => {
           />
 
           {/* Image Number and Add to Cart Button (Side by Side) */}
-          <div className="flex items-center gap-4 mb-6">
+          <div className="flex items-center m-5 mb-6">
             <div>
-              <label className="block text-gray-700 mb-2">Image Number</label>
+              {/* <label className="block text-gray-700 mb-2">Image Number</label> */}
               <input
                 type="number"
                 name="quantity"
                 min="1"
                 value={formData.quantity || 1}
                 onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-                className="w-20 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primaryRed"
+                className="w-20 p-2 border text-md text-center border-black"
                 required
               />
             </div>
@@ -301,13 +393,11 @@ const ServicePage = () => {
             {/* Add to Cart Button */}
             <button
               onClick={handleAddToCart}
-              className="mt-6 px-6 py-2 bg-primaryRed text-white rounded-md hover:bg-red-700 transition-colors"
+              className="px-6 py-2 text-md text-primaryBlack hover:bg-black hover:text-white border border-primaryBlack bg-white transition-colors"
             >
               {isInCart ? "Update Cart" : "Add to Cart"}
             </button>
           </div>
-
-
         </div>
       </div>
     </div>

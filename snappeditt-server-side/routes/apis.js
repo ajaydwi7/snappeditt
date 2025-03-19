@@ -25,4 +25,9 @@ router.get("/users/:id", checkAuth, async (req, res) => {
   }
 });
 
+// Password reset routes
+router.post("/forgot-password", authController.forgotPassword);
+router.post("/reset-password/:token", authController.resetPassword);
+router.post("/change-password", checkAuth, authController.changePassword);
+
 module.exports = router;

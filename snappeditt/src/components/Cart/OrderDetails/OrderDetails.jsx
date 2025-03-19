@@ -56,7 +56,7 @@ const OrderDetails = ({ service }) => {
               ))}
             </div>
           ) : (
-            <p><strong>Base Price Applied</strong></p>
+            <p><strong>Standard Price Applied</strong></p>
           )}
 
           {/* Display Additional Form Data */}

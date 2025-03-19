@@ -10,8 +10,14 @@ const asyncHandler = (fn) => (req, res, next) => {
 router.post(
   "/create-order",
   asyncHandler(async (req, res) => {
-    const { orderTotal, items } = req.body;
+    let { orderTotal, items, discount = 0 } = req.body;
+    orderTotal = Number(orderTotal);
+    discount = Number(discount);
+    const finalTotal = orderTotal - discount;
 
+    if (isNaN(orderTotal) || isNaN(discount)) {
+      return res.status(400).json({ error: "Invalid numeric values" });
+    }
     if (!orderTotal || !items || items.length === 0) {
       return res.status(400).json({ error: "Invalid request payload" });
     }
@@ -24,9 +30,13 @@ router.post(
         {
           amount: {
             currency_code: "USD",
-            value: orderTotal,
+            value: finalTotal.toFixed(2),
             breakdown: {
-              item_total: { currency_code: "USD", value: orderTotal },
+              item_total: {
+                currency_code: "USD",
+                value: parseFloat(orderTotal).toFixed(2),
+              },
+              discount: { currency_code: "USD", value: discount.toFixed(2) },
             },
           },
           items: items.map((item) => ({

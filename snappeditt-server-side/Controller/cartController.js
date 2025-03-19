@@ -2,9 +2,12 @@ const mongoose = require("mongoose");
 const Cart = require("../models/Cart");
 const Category = require("../models/Category");
 
-// Add item to cart
 exports.addToCart = async (req, res) => {
   const { userId, item } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ error: "Invalid user ID format" });
+  }
 
   if (!userId || !item) {
     return res
@@ -36,21 +39,25 @@ exports.addToCart = async (req, res) => {
     // Calculate the final price
     let finalPrice = foundService.basePrice;
 
+    // In addToCart controller
     if (item.selectedVariations && item.selectedVariations.length > 0) {
-      const selectedIds = item.selectedVariations.map((v) =>
-        v.optionId.toString()
-      );
+      // Collect selected option names
+      const selectedNames = item.selectedVariations.map((v) => v.optionName);
 
-      // Find matching price combination
-      const matchedCombination = foundService.priceCombinations.find(
+      // Find matching combination by names
+      const combination = foundService.priceCombinations.find(
         (pc) =>
-          pc.combination.every((id) => selectedIds.includes(id.toString())) &&
-          pc.combination.length === selectedIds.length
+          pc.combination.length === selectedNames.length &&
+          pc.combination.every((name) => selectedNames.includes(name))
       );
 
-      if (matchedCombination) {
-        finalPrice = matchedCombination.price;
+      if (combination) {
+        finalPrice = combination.price;
+      } else {
+        return res.status(400).json({ error: "Invalid variation combination" });
       }
+    } else {
+      finalPrice = foundService.basePrice;
     }
 
     let cart = await Cart.findOne({ user: userId });
@@ -69,13 +76,13 @@ exports.addToCart = async (req, res) => {
 
     if (existingItemIndex >= 0) {
       cart.items[existingItemIndex].quantity += item.quantity;
-      cart.items[existingItemIndex].finalPrice = finalPrice; // Update price based on selected variations
+      cart.items[existingItemIndex].finalPrice = finalPrice;
     } else {
       cart.items.push({
         serviceId: foundService._id,
         serviceName: foundService.name,
-        basePrice: foundService.basePrice,
-        finalPrice: finalPrice,
+        basePrice: Number(foundService.basePrice || 0),
+        finalPrice: Number(finalPrice || foundService.basePrice || 0),
         quantity: item.quantity,
         featureImage: foundService.featureImage,
         selectedVariations: item.selectedVariations,

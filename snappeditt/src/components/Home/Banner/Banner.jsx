@@ -1,10 +1,9 @@
 import Video from "@/assets/video/SE-video.mp4";
 import { useEffect, useState } from "react";
-import { useGlobalContext } from "@/components/GlobalContext/GlobalContext";
 import "./Banner.css";
+import { Link } from "react-router-dom";
 
 const Banner = () => {
-  const { modal } = useGlobalContext(); // Access modal functions
   const [text, setText] = useState("Edit"); // Initialize state for text
 
 
@@ -16,10 +15,6 @@ const Banner = () => {
     return () => clearInterval(interval); // Cleanup on unmount
   }, []);
 
-  const handleGetStarted = () => {
-    modal.openModal(true); // Open the register modal
-  };
-
   return (
     <div className="sub-container">
       <div className="banner">
@@ -30,7 +25,9 @@ const Banner = () => {
             Images without any Compromise
           </h1>
           <span className="is-buy-now">
-            <button className="btn-rounded buy-now mb-4" onClick={handleGetStarted}>Get Started</button>
+            <button className="btn-rounded buy-now mb-4">
+              <Link to={"/register"}>
+                Get Started</Link></button>
           </span>
         </div>
         <div className="subject">

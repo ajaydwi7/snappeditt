@@ -46,27 +46,12 @@ const ServiceOrderSchema = new Schema({
       },
     },
   ],
-  deliveryType: {
-    type: String,
-    required: true,
-  },
   totalCost: {
     type: Number,
     required: true,
+    min: 0,
   },
-  phoneNumber: {
-    type: String,
-    required: true,
-  },
-  status: {
-    type: String,
-    default: "Pending",
-  },
-  paypalOrderId: {
-    type: String,
-    required: true,
-    unique: true,
-  },
+
   billingDetails: {
     name: {
       type: String,
@@ -96,6 +81,40 @@ const ServiceOrderSchema = new Schema({
       type: String,
       required: true,
     },
+  },
+  // Add to ServiceOrderSchema
+  couponCode: {
+    type: String,
+    default: null,
+  },
+  discountApplied: {
+    type: Number,
+    default: 0,
+    min: 0,
+  },
+  paypalOrderId: {
+    type: String,
+    required: function () {
+      return this.totalCost > 0;
+    },
+    index: {
+      unique: true,
+      sparse: true, // Allow multiple null values
+    },
+  },
+  status: {
+    type: String,
+    default: "Pending",
+  },
+  paymentStatus: {
+    type: String,
+    enum: ["Pending", "Completed", "Failed", "Refunded"],
+    default: "Pending",
+    required: true,
+  },
+  invoiceUrl: {
+    type: String,
+    required: true,
   },
   order_cancelled: {
     type: Boolean,
