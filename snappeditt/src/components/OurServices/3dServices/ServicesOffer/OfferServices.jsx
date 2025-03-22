@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 const OfferServices = () => {
   const service = {
     title: "3D Floor Plans",
     price: "$0.00 – $60.00/Image",
     description: "Unlike a 2D Floor Plan, a 3D Floor Plan includes perspective which makes it easier for you to understand the size and layout of a space. 3D Floor Plan renderings give depth and detail to traditionally used 2D floor plans. These types of floor cut renderings allow potential buyers to envision themselves in the home or building and understand the spatial arrangement of various areas within the property. 3D Floor Plans are useful for real estate marketing, home staging, and home design projects.",
+    buttonUrl: '/services/3d-services/3d-floor-plan',
     images: [
       [
         new URL('@/assets/images/Day-to-Dusk-SHP-Raw-1.jpg', import.meta.url).href
@@ -74,8 +76,10 @@ const OfferServices = () => {
           <div className="content-area">
             <h4 className='content-area-title'>{service.title}</h4>
             <p className="price">{service.price}</p>
-            <button className="add-to-cart-btn">Add to Cart</button>
-            <button className="details-btn">More Details</button>
+            <button className="add-to-cart-btn"><Link to={service.buttonUrl} className='
+              text-black'>Add to Cart</Link></button>
+            <button className="details-btn"><Link to={service.buttonUrl} className='
+              text-black'>More Details</Link></button>
             <p className="description">{service.description}</p>
           </div>
         </div>

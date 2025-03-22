@@ -1,59 +1,230 @@
 const mongoose = require("mongoose");
 
-//Retouching Type schema
-const retouchingTypeSchema = new mongoose.Schema({
-  name: { type: String, required: false }, // Retouching type name (e.g., Interior, Exterior)
-  description: { type: String }, // Optional description for the retouching type
+// Variation Option schema
+/// Variation Option schema
+const variationOptionSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+  description: String,
 });
 
-// Define the schema for features
+// Variation Type schema
+const variationTypeSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+  options: [variationOptionSchema],
+  required: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+// Price Combination schema (now using option names)
+const priceCombinationSchema = new mongoose.Schema({
+  combination: [
+    {
+      type: String,
+      required: true,
+    },
+  ],
+  price: {
+    type: Number,
+    required: true,
+  },
+  description: String,
+});
+
+// Feature schema
 const featureSchema = new mongoose.Schema({
-  name: { type: String, required: true }, // Feature name
-  included: { type: Boolean, default: true }, // Whether the feature is included
+  name: {
+    type: String,
+    required: true,
+  },
+  included: {
+    type: Boolean,
+    default: true,
+  },
 });
 
-// Define the schema for images (before/after)
+// Image schema
 const imageSchema = new mongoose.Schema({
-  before: { type: String, required: true }, // URL for the before image
-  after: { type: String, required: true }, // URL for the after image
+  before: {
+    type: String,
+  },
+  after: {
+    type: String,
+  },
 });
 
-// Define the schema for form fields
-const formFieldSchema = new mongoose.Schema({
-  name: { type: String, required: true }, // Field name
-  type: { type: String, required: true }, // Field type (e.g., text, file, textarea)
-  placeholder: { type: String }, // Placeholder text
-  required: { type: Boolean, default: false }, // Whether the field is required
-});
-
-// Define the schema for services
+// Service schema
 const serviceSchema = new mongoose.Schema({
-  name: { type: String, required: true }, // Name of the service
-  slug: { type: String, unique: true, required: true }, // Unique identifier for the service
-  description: { type: String, required: true }, // Service description
-  price: { type: Number, required: true },
-  featureImage: { type: String, required: true }, // Price of the service
-  features: [featureSchema], // Array of features
-  images: [imageSchema], // Array of images (before/after)
-  formFields: [formFieldSchema], // Array of form fields for orders
-  retouchingTypes: [retouchingTypeSchema],
+  name: {
+    type: String,
+    required: true,
+  },
+  slug: {
+    type: String,
+    unique: true,
+    required: true,
+  },
+  description: {
+    type: String,
+  },
+  basePrice: {
+    type: Number,
+    required: true,
+  },
+  priceRange: {
+    min: Number,
+    max: Number,
+  },
+  featureImage: {
+    type: String,
+    required: true,
+  },
+  features: [featureSchema],
+  images: [imageSchema],
+  variationTypes: [variationTypeSchema],
+  priceCombinations: [priceCombinationSchema],
 });
 
-// Define the schema for subcategories
+// Updated pre-save hook
+serviceSchema.pre("save", function (next) {
+  // Block any MongoDB IDs in price combinations
+  // Block any MongoDB IDs in combinations
+  this.priceCombinations.forEach((pc) => {
+    if (pc.combination.some((name) => mongoose.Types.ObjectId.isValid(name))) {
+      throw new Error(
+        `Invalid combination format. Use option names, not IDs: ${pc.combination}`
+      );
+    }
+  });
+
+  // 1. Generate IDs for variation options
+  this.variationTypes.forEach((vt) => {
+    vt.options = vt.options.map((opt) => {
+      if (!opt._id) opt._id = new mongoose.Types.ObjectId();
+      return opt;
+    });
+  });
+
+  // 2. Create name validation map
+  const validOptionNames = new Set();
+  this.variationTypes.forEach((vt) => {
+    vt.options.forEach((opt) => {
+      if (validOptionNames.has(opt.name)) {
+        throw new Error(`Duplicate option name: ${opt.name}`);
+      }
+      validOptionNames.add(opt.name);
+    });
+  });
+
+  // 3. Handle single variation type
+  if (this.variationTypes.length === 1) {
+    const singleVariation = this.variationTypes[0];
+    singleVariation.options.forEach((opt) => {
+      const exists = this.priceCombinations.some(
+        (pc) => pc.combination.length === 1 && pc.combination[0] === opt.name
+      );
+      if (!exists) {
+        this.priceCombinations.push({
+          combination: [opt.name],
+          price: this.basePrice,
+        });
+      }
+    });
+  }
+
+  // 4. Validate combinations for multi-variation
+  if (this.variationTypes.length > 1) {
+    // Validate combination length
+    this.priceCombinations.forEach((pc) => {
+      if (pc.combination.length !== this.variationTypes.length) {
+        throw new Error(
+          `Combination ${pc.combination} requires ${this.variationTypes.length} options`
+        );
+      }
+    });
+
+    // Validate all options are covered
+    const coveredOptions = new Set(
+      this.priceCombinations.flatMap((pc) => pc.combination)
+    );
+
+    const missingOptions = Array.from(validOptionNames).filter(
+      (name) => !coveredOptions.has(name)
+    );
+
+    if (missingOptions.length > 0) {
+      throw new Error(`Missing combinations for: ${missingOptions.join(", ")}`);
+    }
+  }
+
+  // 5. Validate all combination names exist
+  this.priceCombinations.forEach((pc) => {
+    pc.combination.forEach((name) => {
+      if (!validOptionNames.has(name)) {
+        throw new Error(`Invalid option name: ${name}`);
+      }
+    });
+  });
+
+  // Calculate price range
+  const prices = this.priceCombinations
+    .map((pc) => pc.price)
+    .filter(Number.isFinite);
+  this.priceRange =
+    prices.length > 0
+      ? {
+          min: Math.min(...prices),
+          max: Math.max(...prices),
+        }
+      : {
+          min: this.basePrice,
+          max: this.basePrice,
+        };
+
+  this.basePrice = this.priceRange.min;
+  next();
+});
+
+// Subcategory schema
 const subCategorySchema = new mongoose.Schema({
-  name: { type: String, required: true }, // Name of the subcategory
-  slug: { type: String, unique: true, required: true }, // Unique identifier for the subcategory
-  description: String, // Description of the subcategory
-  services: [serviceSchema], // Array of services under this subcategory
+  name: {
+    type: String,
+    required: true,
+  },
+  slug: {
+    type: String,
+    unique: true,
+    required: true,
+  },
+  description: {
+    type: String,
+  },
+  services: [serviceSchema],
 });
 
-// Define the main category schema
+// Main Category schema
 const categorySchema = new mongoose.Schema(
   {
-    name: { type: String, required: true }, // Name of the category
-    slug: { type: String, unique: true, required: true }, // Unique identifier for the category
-    description: String, // Description of the category
-    subCategories: [subCategorySchema], // Array of subcategories under this category
+    name: {
+      type: String,
+      required: true,
+    },
+    slug: {
+      type: String,
+      unique: true,
+      required: true,
+    },
+    description: {
+      type: String,
+    },
+    subCategories: [subCategorySchema],
   },
   { timestamps: true }
 );

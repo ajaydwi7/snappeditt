@@ -1,50 +1,50 @@
-import Account from "./Account/Account";
-import Links from "./Links/Links";
-import Logo from "./Logo/Logo";
-import Search from "./Search/Search";
-import Hamburger from "hamburger-react";
-import "./NavBar.css";
+"use client"
+
+import { useState } from "react"
+import Account from "./Account/Account"
+import Links from "./Links/Links"
+import Logo from "./Logo/Logo"
+import Hamburger from "hamburger-react"
+import "./NavBar.css"
 
 const NavBar = () => {
-  const handleHamClick = () => {
-    let mobileExpandedMenu = document.querySelector(".mobile-expanded-menu");
-    mobileExpandedMenu.classList.toggle("mobile-expanded");
-  };
-  const removeExpandedClass = () => {
-    let mobileExpandedMenu = document.querySelector(".mobile-expanded-menu");
-    if (mobileExpandedMenu.classList.contains("mobile-expanded")) {
-      mobileExpandedMenu.classList.remove("mobile-expanded");
-      return true;
-    }
+  const [isOpen, setIsOpen] = useState(false)
 
-    return false;
-  };
+  const handleHamClick = () => {
+    setIsOpen(!isOpen)
+    document.body.classList.toggle("no-scroll")
+  }
+
+  const closeMenu = () => {
+    setIsOpen(false)
+    document.body.classList.remove("no-scroll")
+    document.documentElement.classList.remove("no-scroll")
+  }
+
   return (
     <div className="sub-container nav-main">
       <div className="nav-container">
-        <Logo></Logo>
+        <Logo />
 
         <span className="desktop-links">
-          <Links></Links>
+          <Links closeMenu={closeMenu} />
         </span>
-        {/* <Search></Search> */}
-        <Account></Account>
-        <button type="button" className="hamburger">
-          <Hamburger
-            size={20}
-            color="#fff"
-            toggle={handleHamClick}
-            rounded
-          ></Hamburger>
+
+        <Account closeMenu={closeMenu} />
+
+        <button type="button" className="hamburger" aria-label="Toggle navigation menu" onClick={handleHamClick}>
+          <Hamburger size={24} color="#fff" toggled={isOpen} rounded />
         </button>
       </div>
+
       <div className="nav-mobile">
-        <div className="mobile-expanded-menu">
-          <Links></Links>
-          <Account></Account>
+        <div className={`mobile-expanded-menu ${isOpen ? "mobile-expanded" : ""}`}>
+          <Links closeMenu={closeMenu} isMobile={true} />
         </div>
       </div>
     </div>
-  );
-};
-export default NavBar;
+  )
+}
+
+export default NavBar
+

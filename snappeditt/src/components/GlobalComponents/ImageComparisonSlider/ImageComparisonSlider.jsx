@@ -54,6 +54,23 @@ const ImageComparisonSlider = ({ beforeImage, afterImage }) => {
     return () => clearInterval(interval);
   }, [isDragging, isHovered]);
 
+  // Add touch events to ImageComparisonSlider.jsx
+  useEffect(() => {
+    const handleTouchMove = (e) => {
+      if (!isDragging) return;
+      const slider = sliderRef.current;
+      const rect = slider.getBoundingClientRect();
+      const offsetX = e.touches[0].clientX - rect.left;
+      const newValue = (offsetX / rect.width) * 100;
+      setSliderValue(Math.min(Math.max(newValue, 0), 100));
+    };
+
+    sliderRef.current.addEventListener('touchmove', handleTouchMove);
+    return () => {
+      sliderRef.current?.removeEventListener('touchmove', handleTouchMove);
+    };
+  }, [isDragging]);
+
   useEffect(() => {
     const slider = sliderRef.current;
     slider.addEventListener('mousemove', handleMouseMove);

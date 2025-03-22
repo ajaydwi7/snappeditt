@@ -27,6 +27,7 @@ import ClippingPath from "@images/icons/vector.svg";
 
 
 
+
 // Exporting all images to be used in other components
 export {
   Exposure, Manual, Retouching, Floor, Virtual, DayToDusk, ColorBalance, Cropping, Culling, Address, Preset, Dodging, ECommerce, Apparel, Jewelry, Fashion, Composite, GhostMannequin, Pregnancy, Newborn, Sports, Screen, Extraction, ClippingPath,

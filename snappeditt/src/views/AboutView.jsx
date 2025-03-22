@@ -7,13 +7,19 @@ import WhyChooseUs from '../components/AboutUs/WhyChooseUs/WhyChooseUs';
 import ImageGallery from '../components/AboutUs/Gallery/Gallery';
 
 const AboutView = () => {
+  const scrollToSection = (sectionId) => {
+    const section = document.querySelector(sectionId);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
   return (
     <div>
       <main>
         <section className="about-banner">
-          <AboutBanner></AboutBanner>
+          <AboutBanner scrollToSection={scrollToSection}></AboutBanner>
         </section>
-        <section className='missonVission'>
+        <section className='missonVission' id='missionVision'>
           <MissionVision
             title='Mission & Vision'
             content="Our vision is to be the best and first choice for all the photographers/companies worldwide for their post-production requirement.

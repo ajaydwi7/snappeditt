@@ -18,7 +18,7 @@
 
 .agency-title {
   font-size: 3rem;
-  margin-bottom: 20px;
+  /* margin-bottom: 20px; */
 }
 
 .agency-title .spantext {
@@ -72,8 +72,10 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .agency-container {
+    width: 100%;
     flex-direction: column;
     text-align: center;
+    padding: 0;
   }
 
   .agency-content {
@@ -86,6 +88,11 @@
   }
 
   .agency-title {
-    font-size: 2.5rem;
+    font-size: 2rem;
+  }
+  .agency-text {
+    font-size: 1rem;
+    margin-bottom: 20px;
+    max-width: 500px;
   }
 }

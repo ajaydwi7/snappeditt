@@ -60,10 +60,14 @@ const TestimonialSection = () => {
 
   useEffect(() => {
     heightFix();
+    window.addEventListener('resize', heightFix);
+    return () => window.removeEventListener('resize', heightFix);
   }, [active]);
 
   const heightFix = () => {
-    testimonialsRef.current.style.height = testimonialsRef.current.children[active].offsetHeight + 'px';
+    if (testimonialsRef.current) {
+      testimonialsRef.current.style.height = `${testimonialsRef.current.children[active]?.offsetHeight}px`;
+    }
   };
 
   return (
@@ -74,30 +78,57 @@ const TestimonialSection = () => {
       </div>
 
       <div className="testimonial-container">
-        <div className="gradient-bg"></div> {/* Gradient background here */}
+        <div className="gradient-bg"></div>
         <div className="image-container">
           <div className="image-wrapper">
             {testimonials.map((testimonial, index) => (
-              <div key={index} className={`image-item ${active === index ? 'active' : ''}`}>
-                <img src={testimonial.img} alt={testimonial.name} className="testimonial-image" />
+              <div
+                key={index}
+                className={`image-item ${active === index ? 'active' : ''}`}
+              >
+                <img
+                  src={testimonial.img}
+                  alt={testimonial.name}
+                  className="testimonial-image"
+                  loading="lazy"
+                />
               </div>
             ))}
           </div>
         </div>
 
-        {/* Rest of the content */}
         <div className="text-container" ref={testimonialsRef}>
           {testimonials.map((testimonial, index) => (
-            <div key={index} className={`text-item ${active === index ? 'active' : ''}`}>
+            <div
+              key={index}
+              className={`text-item ${active === index ? 'active' : ''}`}
+            >
               <blockquote className="testimonial-quote">
                 {testimonial.quote}
               </blockquote>
+              <span className='mobile-author-name'>{testimonial.name}</span>
+
             </div>
           ))}
         </div>
 
-        {/* Buttons */}
-        <div className="buttons-container">
+        {/* Mobile Dot Indicators */}
+        <div className="buttons-container mobile-only">
+          {testimonials.map((testimonial, index) => (
+            <button
+              key={index}
+              className={`dot-indicator ${active === index ? 'active' : ''}`}
+              onClick={() => {
+                setActive(index);
+                setAutorotate(false);
+              }}
+              aria-label={`View ${testimonial.name}'s testimonial`}
+            />
+          ))}
+        </div>
+
+        {/* Desktop Buttons */}
+        <div className="buttons-container desktop-only">
           {testimonials.map((testimonial, index) => (
             <button
               key={index}
@@ -106,8 +137,12 @@ const TestimonialSection = () => {
                 setActive(index);
                 setAutorotate(false);
               }}
+              onMouseEnter={() => setAutorotate(false)}
+              onMouseLeave={() => setAutorotate(true)}
             >
-              <span>{testimonial.name} - {testimonial.role}</span>
+              <span className="button-text">
+                {testimonial.name} - {testimonial.role}
+              </span>
             </button>
           ))}
         </div>

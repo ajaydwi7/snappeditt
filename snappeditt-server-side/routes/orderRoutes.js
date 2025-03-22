@@ -5,6 +5,7 @@ const {
   confirmOrder,
   getAllOrders,
   getOrderById,
+  getOrderInvoice,
 } = require("../Controller/orderController");
 
 const router = express.Router();
@@ -25,5 +26,6 @@ router.post("/cancel", cancelOrder);
 
 // Route to fetch a single order by ID
 router.get("/:orderId", getOrderById);
+router.get("/:orderId/invoice", getOrderInvoice);
 
 module.exports = router;

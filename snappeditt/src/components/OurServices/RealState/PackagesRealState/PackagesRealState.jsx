@@ -122,7 +122,7 @@ const RealEstatePackages = () => {
       title: 'Architecture Retouching',
       description: 'Perfect HDR with balanced color correction.',
       price: '$0.75/Image',
-      addToCartBtn: '/services/real-estate/srchitecture-retouching',
+      addToCartBtn: '/services/real-estate/architecture-retouch',
       moreBtn: '/services/real-estate/srchitecture-retouching',
       features: [
         { name: 'HDR Blending', included: true },
@@ -141,8 +141,8 @@ const RealEstatePackages = () => {
       title: 'Custom Retouch​',
       description: 'Perfect HDR with balanced color correction.',
       price: '$0.75/Image',
-      addToCartBtn: '/services/real-estate/custome-retouch',
-      moreBtn: '/services/real-estate/custome-retouch',
+      addToCartBtn: '/services/real-estate/custom-retouch',
+      moreBtn: '/services/real-estate/custom-retouch',
       features: [
         { name: 'HDR Blending', included: true },
         { name: 'Color Correction', included: true },

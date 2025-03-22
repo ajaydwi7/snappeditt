@@ -30,8 +30,8 @@ export const ContactBanner = (props) => {
       id="relume"
       className="relative grid grid-cols-1 items-center gap-y-16 pt-16 md:pt-24 lg:grid-cols-2 lg:pt-0"
     >
-      {/* Social Media Icons */}
-      <div className="absolute top-1/3 left-0 flex flex-col items-center space-y-4 pl-4">
+      {/* Social Media Icons - Hidden on mobile */}
+      <div className="hidden md:flex absolute top-1/3 left-0 flex-col items-center space-y-4 pl-4">
         {socialMedia.map((item, index) => (
           <a
             key={index}
@@ -45,7 +45,7 @@ export const ContactBanner = (props) => {
         ))}
       </div>
 
-      {/* Content */}
+      {/* Rest of the component remains unchanged */}
       <div className="mx-[5%] sm:max-w-md md:justify-self-start lg:ml-[5vw] lg:mr-20 lg:justify-self-end">
         <h5 className="md:text-md font-bold" style={{ color: '#f44336' }}>
           {description}
@@ -56,11 +56,8 @@ export const ContactBanner = (props) => {
         >
           {heading}
         </h1>
-
-
       </div>
 
-      {/* Image */}
       <div className="h-full">
         <img
           src={image.src}

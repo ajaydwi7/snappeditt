@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import ImageComparisonSlider from '@/components/GlobalComponents/ImageComparisonSlider/ImageComparisonSlider';
+import { CircleCheck, CircleX } from 'lucide-react';
 
 
 const WeddingRetouch = () => {
@@ -72,7 +73,9 @@ const WeddingRetouch = () => {
             <p className="description">{service.description}</p>
             <ul className="features-list">
               {service.features.map((feature, index) => (
-                <li key={index}>{feature.name}</li>
+                <li key={index}>
+                  <span className='px-1'>{feature.included ? <CircleCheck className='text-green-500' /> : <CircleX className='text-primaryRed' />}</span> {feature.name}
+                </li>
               ))}
             </ul>
           </div>

@@ -6,6 +6,7 @@ import SelectService from '@/assets/images/icons/package.svg';
 import Relax from '@/assets/images/icons/relax.svg';
 import Upload from '@/assets/images/icons/upload.svg';
 import Download from '@/assets/images/icons/customer-feedback.svg';
+import { Link } from 'react-router-dom';
 
 const TimelineSection = () => {
   const timelineData = [
@@ -60,7 +61,9 @@ const TimelineSection = () => {
             </li>
           ))}
         </ul>
-        <button className="btn-primary">GET STARTED WITH YOUR FIRST ORDER</button>
+        <button className="btn-primary">
+          <Link to={"/register"}>
+            GET STARTED WITH YOUR FIRST ORDER </Link></button>
       </div>
     </div>
   );

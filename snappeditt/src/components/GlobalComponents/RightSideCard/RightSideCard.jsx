@@ -1,5 +1,6 @@
 import React from 'react';
 import './RightSideCard.css';
+import { CircleCheck, CircleX } from "lucide-react";
 
 const RightSideCard = ({ title, description, price, features, addToCartBtn, moreBtn }) => {
   return (
@@ -11,7 +12,7 @@ const RightSideCard = ({ title, description, price, features, addToCartBtn, more
       <ul className="features-list">
         {features.map((feature, index) => (
           <li key={index}>
-            <span>{feature.included ? '✔️' : '❌'}</span> {feature.name}
+            <span className='pr-1'>{feature.included ? <CircleCheck className='text-green-500' /> : <CircleX className='text-primaryRed' />}</span> {feature.name}
           </li>
         ))}
       </ul>

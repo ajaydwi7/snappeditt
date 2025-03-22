@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import Tabs from "@/components/GlobalComponents/Tabs/Tabs";
 import ImageComparisonSlider from "@/components/GlobalComponents/ImageComparisonSlider/ImageComparisonSlider";
 import "./OurServices.css";
+
+import { CircleArrowRight } from "lucide-react";
+
 
 import {
   Exposure,
@@ -33,22 +37,38 @@ import {
 const OurServices = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
   const [lineWidth, setLineWidth] = useState(40); // Start with 40%
   const [lastScrollY, setLastScrollY] = useState(window.scrollY); // Track last scroll position
 
+  // Mobile detection
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // In the useEffect scroll handler
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
+      const scrollDelta = currentScrollY - lastScrollY;
 
-      if (currentScrollY > lastScrollY) {
-        // Scrolling down: Increase line width
-        setLineWidth((prevWidth) => Math.min(prevWidth + 2, 40)); // Scale up to max 100%
-      } else if (currentScrollY < lastScrollY) {
-        // Scrolling up: Decrease line width
-        setLineWidth((prevWidth) => Math.max(prevWidth - 2, 0)); // Scale down to min 40%
-      }
+      // Slow down the animation by reducing the sensitivity
+      setLineWidth(prevWidth => {
+        let newWidth = prevWidth;
+        if (scrollDelta > 0) { // Scrolling down
+          newWidth = Math.min(prevWidth + 0.5, 40); // Reduced from +2 to +0.5
+        } else if (scrollDelta < 0) { // Scrolling up
+          newWidth = Math.max(prevWidth - 0.5, 0); // Reduced from -2 to -0.5
+        }
+        return newWidth;
+      });
 
-      setLastScrollY(currentScrollY); // Update last scroll position
+      setLastScrollY(currentScrollY);
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -82,6 +102,7 @@ const OurServices = () => {
         { icon: DayToDusk, text: "Day to Dusk" },
       ],
       buttonText: "Check Our Packages",
+      buttonLink: "/services/real-estate",
       images: [
         [new URL('@/assets/images/Real-Estate-Manual_Blending-Raw-3.jpg', import.meta.url).href,
         new URL('@/assets/images/Real-Estate-Manual_Blending-Corrected-3.jpg', import.meta.url).href],
@@ -98,6 +119,7 @@ const OurServices = () => {
         { icon: Virtual, text: "3D Rendering" },
       ],
       buttonText: "Check Our Packages",
+      buttonLink: "/services/3d-services",
       images: [
         [new URL('@/assets/images/3D-Rendering-P-3.jpg', import.meta.url).href, null],
         [new URL('@/assets/images/3D-Rendering-1.jpg', import.meta.url).href, null
@@ -120,6 +142,7 @@ const OurServices = () => {
         { icon: Dodging, text: "Dodging & Burning" },
       ],
       buttonText: "Check Our Packages",
+      buttonLink: "/services/wedding-events",
       images: [
         [new URL('@/assets/images/Wedding-Events-HP-Raw-1.jpg', import.meta.url).href,
         new URL('@/assets/images/Wedding-Events-HP-Corrected-1.jpg', import.meta.url).href,
@@ -142,6 +165,7 @@ const OurServices = () => {
         { icon: GhostMannequin, text: "Ghost Mannequin" },
       ],
       buttonText: "Check Our Packages",
+      buttonLink: "/services/products-ecommerce",
       images: [
         [new URL('@/assets/images/Product-eComm-HP-Raw-1-2048x1365.jpg', import.meta.url).href,
         new URL('@/assets/images/Product-eComm-HP-Corrected-1-2048x1365.jpg', import.meta.url).href,
@@ -164,6 +188,7 @@ const OurServices = () => {
         { icon: Fashion, text: "Fashion Retouching" },
       ],
       buttonText: "Check Our Packages",
+      buttonLink: "/services/people-retouching",
       images: [
         [new URL('@/assets/images/Baby-SPH-Raw-3.jpg', import.meta.url).href,
         new URL('@/assets/images/Baby-SPH-Corrected-3.jpg', import.meta.url).href,
@@ -189,6 +214,7 @@ const OurServices = () => {
         { icon: ClippingPath, text: "CP with Shadows & Reflection" },
       ],
       buttonText: "Check Our Packages",
+      buttonLink: "/services/clipping-path-extraction",
       images: [
         [new URL('@/assets/images/Clipping-Path-HP-RAW-1.jpg', import.meta.url).href,
         new URL('@/assets/images/Clipping-Path-HP-Corrected-1.jpg', import.meta.url).href
@@ -212,75 +238,158 @@ const OurServices = () => {
   };
 
   return (
-    <div className="container">
+    <div id="services" className="container">
       <h2 className="service-title">Services We Offer......</h2>
-      <div
-        className="dynamic-line"
-        style={{
-          width: `${lineWidth}%`,
-          transition: "width 0.5s ease-in-out",
-        }}
-      ></div>
+      {!isMobile && (
+        <div
+          className="dynamic-line"
+          style={{
+            width: `${lineWidth}%`,
+            transition: "width 0.5s ease-in-out",
+          }}
+        ></div>
+      )}
 
-      {/* Tabs Component */}
-      <Tabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
+      {/* Mobile Accordion */}
+      {isMobile ? (
+        <div className="mobile-tabs">
+          {tabs.map((tab, index) => (
+            <div
+              key={index}
+              className={`mobile-tab-item ${activeTab === index ? 'active' : ''}`}
+            >
+              <button
+                className="mobile-tab-header"
+                onClick={() => setActiveTab(activeTab === index ? -1 : index)}
+              >
+                {tab}
+                <span className="mobile-tab-indicator">
+                  {activeTab === index ? '−' : '+'}
+                </span>
+              </button>
 
-      <div className="content-wrapper">
-        {/* Left Column */}
-        <div className="left-column">
-          <h3>{currentContent.title}</h3>
-          <p>{currentContent.description}</p>
-          <div className="icon-items">
-            {currentContent.iconItems.map((item, index) => (
-              <div className="icon-item" key={index}>
-                <img src={item.icon} alt={item.text} className="svg-icon" />
-                {item.text}
-              </div>
-            ))}
-          </div>
-          <button className="check-packages-btn">
-            <a href="#">{currentContent.buttonText}</a>
-          </button>
-        </div>
+              {activeTab === index && (
+                <div className="mobile-tab-content">
+                  <div className="content-columns">
+                    <div className="left-column">
+                      <p>{tabDetails[index].description}</p>
+                      <div className="icon-items">
+                        {tabDetails[index].iconItems.map((item, idx) => (
+                          <div className="icon-item" key={idx}>
+                            <img src={item.icon} alt={item.text} className="svg-icon" />
+                            {item.text}
+                          </div>
+                        ))}
+                      </div>
+                      <button className="check-packages-btn">
+                        <Link to={tabDetails[index].buttonLink}>
+                          {tabDetails[index].buttonText}
+                          <CircleArrowRight className="inline px-{2px}" />
+                        </Link>
+                      </button>
+                    </div>
 
-        {/* Right Column with Slider */}
-        <div className="right-column">
-          <div className="carousel">
-            <div className="carousel-slide">
-              {currentContent?.images?.[currentSlide]?.[0] ? (
-                currentContent.images[currentSlide].length === 1 || !currentContent.images[currentSlide][1] ? (
-                  // Render a single image directly
-                  <img
-                    src={currentContent.images[currentSlide][0]}
-                    alt="Service Image"
-                    className="single-image"
-                  />
-                ) : (
-                  <ImageComparisonSlider
-                    beforeImage={currentContent.images[currentSlide][0]}
-                    afterImage={currentContent.images[currentSlide][1]}
-                  />
-
-                )
-              ) : (
-                // Fallback if no images are available
-                <p>No images available</p>
+                    <div className="right-column">
+                      <div className="carousel">
+                        <div className="carousel-slide">
+                          {tabDetails[index].images[currentSlide]?.[0] && (
+                            tabDetails[index].images[currentSlide][1] ? (
+                              <ImageComparisonSlider
+                                beforeImage={tabDetails[index].images[currentSlide][0]}
+                                afterImage={tabDetails[index].images[currentSlide][1]}
+                              />
+                            ) : (
+                              <img
+                                src={tabDetails[index].images[currentSlide][0]}
+                                alt="Service"
+                                className="single-image"
+                              />
+                            )
+                          )}
+                        </div>
+                        <div className="dots bottom-dots">
+                          {tabDetails[index].images.map((_, idx) => (
+                            <span
+                              key={idx}
+                              className={`dot ${currentSlide === idx ? "active" : ""}`}
+                              onClick={() => changeSlide(idx)}
+                            ></span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
 
-            {/* Dot Indicators */}
-            <div className="dots bottom-dots">
-              {currentContent.images.map((_, index) => (
-                <span
-                  key={index}
-                  className={`dot ${currentSlide === index ? "active" : ""}`}
-                  onClick={() => changeSlide(index)}
-                ></span>
-              ))}
+          ))}
+        </div>
+      ) : (
+        /* Desktop Layout */
+        <>
+
+          {/* Tabs Component */}
+          <Tabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
+
+          <div className="content-wrapper">
+            {/* Left Column */}
+            <div className="left-column">
+              <h3>{currentContent.title}</h3>
+              <p>{currentContent.description}</p>
+              <div className="icon-items">
+                {currentContent.iconItems.map((item, index) => (
+                  <div className="icon-item" key={index}>
+                    <img src={item.icon} alt={item.text} className="svg-icon" />
+                    {item.text}
+                  </div>
+                ))}
+              </div>
+              <button className="check-packages-btn">
+                <Link to={currentContent.buttonLink}>{currentContent.buttonText}<CircleArrowRight className="inline px-{2px}" /></Link>
+              </button>
+            </div>
+
+            {/* Right Column with Slider */}
+            <div className="right-column">
+              <div className="carousel">
+                <div className="carousel-slide">
+                  {currentContent?.images?.[currentSlide]?.[0] ? (
+                    currentContent.images[currentSlide].length === 1 || !currentContent.images[currentSlide][1] ? (
+                      // Render a single image directly
+                      <img
+                        src={currentContent.images[currentSlide][0]}
+                        alt="Service Image"
+                        className="single-image"
+                      />
+                    ) : (
+                      <ImageComparisonSlider
+                        beforeImage={currentContent.images[currentSlide][0]}
+                        afterImage={currentContent.images[currentSlide][1]}
+                      />
+
+                    )
+                  ) : (
+                    // Fallback if no images are available
+                    <p>No images available</p>
+                  )}
+                </div>
+
+                {/* Dot Indicators */}
+                <div className="dots bottom-dots">
+                  {currentContent.images.map((_, index) => (
+                    <span
+                      key={index}
+                      className={`dot ${currentSlide === index ? "active" : ""}`}
+                      onClick={() => changeSlide(index)}
+                    ></span>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import { useReducer, useEffect } from "react";
 import { toast } from "react-toastify";
-import { getUserFromLocalStorage } from "../helpers/checkExpiration"; // Adjust path as needed
+import { getUserFromLocalStorage } from "../helpers/checkExpiration";
 
 const initialState = {
   cart: [],
@@ -46,26 +46,32 @@ const useServiceStore = () => {
   useEffect(() => {
     const user = getUserFromLocalStorage();
     if (user && user.id) {
-      fetchCart(user.id); // Fetch the cart from the server on page load
+      fetchCart(user.id);
     }
   }, []);
 
   const fetchCart = async (userId) => {
     try {
+      if (!/^[0-9a-fA-F]{24}$/.test(userId)) {
+        console.error("Invalid user ID format");
+        return;
+      }
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/cart/${userId}`
       );
-      if (!response.ok) {
-        throw new Error("Failed to fetch cart");
+      if (response.status === 404) {
+        dispatch({
+          type: actions.LOAD_CART,
+          payload: { cart: [], cartTotal: 0, cartQuantity: 0 },
+        });
+        return;
       }
-
+      if (!response.ok) throw new Error("Failed to fetch cart");
       const data = await response.json();
-
-      // Update state with fetched cart data
       dispatch({
         type: actions.LOAD_CART,
         payload: {
-          cart: data.services,
+          cart: data.items || [],
           cartTotal: data.cartTotal,
           cartQuantity: data.cartQuantity,
         },
@@ -76,50 +82,86 @@ const useServiceStore = () => {
     }
   };
 
-  const addToCart = async (service, quantity) => {
+  const addToCart = async (item) => {
     try {
       const user = getUserFromLocalStorage();
-
       if (!user || !user.id) {
         toast.error("You must be logged in to add items to the cart.");
+        return;
+      }
+      // Verify valid user ID format
+      if (!/^[0-9a-fA-F]{24}$/.test(user.id)) {
+        toast.error("Invalid user session. Please relogin.");
         return;
       }
 
       const response = await fetch(`${import.meta.env.VITE_API_URL}/cart/add`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: user.id,
-          serviceId: service.id,
-          quantity,
-          formData: service.formData,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id, item }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to add service to cart");
-      }
-
+      if (!response.ok) throw new Error("Failed to add item to cart");
       const updatedCart = await response.json();
-
-      const updatedService = updatedCart.services.find(
-        (item) => item.serviceId === service.id
-      );
-      const serviceName = updatedService?.serviceName || "Service";
 
       dispatch({
         type: actions.ADD_TO_CART,
         payload: {
-          cart: updatedCart.services,
+          cart: updatedCart.items || [],
           cartTotal: updatedCart.cartTotal,
           cartQuantity: updatedCart.cartQuantity,
         },
       });
 
-      toast.success(`${serviceName} updated in cart!`);
+      toast.success(`${item.serviceName} added to cart!`);
     } catch (error) {
+      console.error("Error adding to cart:", error);
+      toast.error("Failed to add item to cart.");
+    }
+  };
+
+  const updateCartQuantity = async (serviceId, quantity) => {
+    try {
+      const user = getUserFromLocalStorage();
+
+      if (!user || !user.id) {
+        toast.error("You must be logged in to update the cart.");
+        return;
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/cart/update`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: user.id,
+            serviceId,
+            quantity,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update quantity");
+      }
+
+      const updatedCart = await response.json();
+
+      dispatch({
+        type: actions.ADD_TO_CART,
+        payload: {
+          cart: updatedCart.items || [],
+          cartTotal: updatedCart.cartTotal,
+          cartQuantity: updatedCart.cartQuantity,
+        },
+      });
+
+      toast.success("Cart updated successfully!");
+    } catch (error) {
+      console.error("Error updating cart:", error);
       toast.error("Failed to update cart.");
     }
   };
@@ -129,13 +171,11 @@ const useServiceStore = () => {
       const user = getUserFromLocalStorage();
 
       if (!user || !user.id) {
-        console.error("User ID is missing in localStorage.");
         toast.error("You must be logged in to remove items from the cart.");
         return;
       }
 
       if (!serviceId) {
-        console.error("Service ID is missing in removeFromCart.");
         toast.error("Service ID is required to remove items from the cart.");
         return;
       }
@@ -155,41 +195,32 @@ const useServiceStore = () => {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to remove service from cart");
+        throw new Error("Failed to remove item from cart");
       }
 
       const updatedCart = await response.json();
 
-      // Update the cart state
       dispatch({
         type: actions.REMOVE_FROM_CART,
         payload: {
-          cart: updatedCart.services,
+          cart: updatedCart.items || [], // Updated to use `items`
           cartTotal: updatedCart.cartTotal,
           cartQuantity: updatedCart.cartQuantity,
         },
       });
 
-      toast.info("Service removed from cart.");
+      toast.success("Item removed from cart.");
     } catch (error) {
-      console.error("Error removing from cart:", error.message);
-      toast.error("Failed to remove service from cart.");
+      console.error("Error removing from cart:", error);
+      toast.error("Failed to remove item from cart.");
     }
   };
 
   const clearCart = async (userId) => {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/cart/clear/${userId}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to clear cart");
-      }
-
+      await fetch(`${import.meta.env.VITE_API_URL}/cart/clear/${userId}`, {
+        method: "DELETE",
+      });
       dispatch({ type: actions.CLEAR_CART });
       toast.success("Cart cleared successfully.");
     } catch (error) {
@@ -202,6 +233,7 @@ const useServiceStore = () => {
     state,
     fetchCart,
     addToCart,
+    updateCartQuantity,
     removeFromCart,
     clearCart,
   };

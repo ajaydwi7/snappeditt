@@ -97,11 +97,22 @@
 }
 
 @media (max-width: 768px) {
+  .gallery-container {
+    width: 100%;
+  }
+
+  .gallery-title {
+    font-size: 2rem;
+  }
   .gallery-grid {
     grid-template-columns: repeat(1, 1fr);
   }
 
   .gallery-image {
     height: 350px;
+  }
+  .prev,
+  .next {
+    font-size: 20px;
   }
 }

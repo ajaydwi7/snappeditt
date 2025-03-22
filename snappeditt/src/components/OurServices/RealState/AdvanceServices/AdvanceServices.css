@@ -63,6 +63,9 @@
   cursor: pointer;
 }
 
+.add-to-cart-btn .details-btn link {
+  color: #2d2d2d;
+}
 .description {
   font-size: 16px;
   margin-top: 15px;
@@ -77,26 +80,6 @@
 .features-list li {
   font-size: 14px;
   padding: 5px 0;
-}
-
-.dots {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-}
-
-.dot {
-  height: 15px;
-  width: 15px;
-  margin: 0 5px;
-  background-color: #bbb;
-  border-radius: 50%;
-  display: inline-block;
-  cursor: pointer;
-}
-
-.dot.active {
-  background-color: #f8b400;
 }
 
 .carousel-image {
@@ -119,4 +102,72 @@
 
 .carousel-control:hover {
   color: #d32f2f; /* Optional: Change color on hover */
+}
+
+/* Add mobile styles */
+@media (max-width: 768px) {
+  .advance-container {
+    padding: 20px;
+  }
+
+  .advance-title {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+
+  .carousel-content {
+    flex-direction: column;
+  }
+
+  .image-slider-container {
+    margin-right: 0;
+    margin-bottom: 20px;
+  }
+
+  .content-area {
+    padding-left: 0;
+  }
+
+  .content-area-title {
+    font-size: 1.4rem;
+  }
+
+  .price {
+    font-size: 1.3rem;
+  }
+
+  .add-to-cart-btn,
+  .details-btn {
+    width: 100%;
+    margin: 8px 0;
+    padding: 12px;
+  }
+
+  .description {
+    font-size: 14px;
+  }
+
+  .features-list li {
+    font-size: 13px;
+  }
+
+  .dots {
+    margin-top: 15px;
+  }
+  .mobile-controls {
+    display: flex;
+    justify-content: space-between;
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    padding: 0 10px;
+    transform: translateY(-50%);
+
+    .mobile-arrow {
+      background: rgba(255, 255, 255, 0.8);
+      padding: 8px;
+      border-radius: 50%;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+  }
 }

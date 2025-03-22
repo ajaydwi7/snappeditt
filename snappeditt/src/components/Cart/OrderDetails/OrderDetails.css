@@ -12,17 +12,38 @@
   width: 10rem;
   height: 10rem;
   object-fit: contain;
+  flex-shrink: 0; /* Prevent the image from shrinking */
 }
 
 .order-detail {
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Align items to the top */
   gap: 1rem;
+  overflow: hidden; /* Prevent overflow from breaking the layout */
+}
+
+.right-side {
+  flex: 1; /* Allow the right side to grow and take remaining space */
+  overflow: hidden; /* Hide overflow instead of adding a scrollbar */
+  line-height: 25px;
+}
+
+.right-side ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.right-side li {
+  white-space: nowrap; /* Prevent text from wrapping */
+  overflow: hidden; /* Hide overflow */
+  text-overflow: ellipsis; /* Add ellipsis for truncated text */
+  max-width: 100%; /* Ensure text doesn't overflow the container */
 }
 
 .order-price {
   display: grid;
-  align-items: center;
+  justify-items: center;
 }
 
 .remove {
@@ -36,10 +57,6 @@
   cursor: pointer;
   color: #e0373d;
   transition: color 0.5s ease;
-  -webkit-transition: color 0.5s ease;
-  -moz-transition: color 0.5s ease;
-  -ms-transition: color 0.5s ease;
-  -o-transition: color 0.5s ease;
 }
 
 .remove button:hover {
@@ -47,7 +64,9 @@
 }
 
 .quantity {
+  display: grid;
   width: min(5rem, 100%);
+  justify-items: center;
 }
 
 button:disabled {
@@ -67,5 +86,13 @@ button:disabled:hover {
 
   .quantity {
     width: 100%;
+  }
+
+  .order-detail {
+    flex-direction: column; /* Stack items vertically on small screens */
+  }
+
+  .right-side li {
+    white-space: normal; /* Allow text to wrap on small screens */
   }
 }

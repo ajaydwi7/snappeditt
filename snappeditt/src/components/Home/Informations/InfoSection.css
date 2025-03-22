@@ -1,9 +1,9 @@
 /* Container */
 .info-container {
-  width: min(90%, 1200px);
+  width: 100%;
   display: flex;
-  width: 80%;
-  max-width: none;
+  /* width: 80%; */
+  max-width: min(90%, 1200px);
   margin: 0 auto;
   padding: 20px;
 }
@@ -20,7 +20,7 @@
   border-radius: 8px; /* Rounded corners for the card */
   width: 350px;
   padding: 20px; /* Padding for the card */
-  margin: -40% 10% 5% 10%;
+  margin: -30% 10% 5% 0%;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
@@ -46,7 +46,7 @@
 
 /* Red Text Section */
 .content-box {
-  padding: 30px;
+  padding-bottom: 50px;
   border-radius: 10px;
   color: #fff;
 }
@@ -118,7 +118,7 @@
   }
 
   .content-box {
-    padding: 20px; /* Adjust padding for smaller screens */
+    /* padding: 20px; Adjust padding for smaller screens */
     margin-top: 20px; /* Add space between info-box and content-box */
   }
 

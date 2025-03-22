@@ -77,15 +77,52 @@
   align-items: center;
 }
 
-.features-list li::before {
-  content: "✔";
+/* .features-list li::before {
   margin-right: 10px;
   color: #00b050;
-}
+} */
 
 /* Image Comparison Slider - right side */
 .image-slider-wrapper {
   flex: 1;
   max-width: 50%;
   position: relative;
+}
+
+/* Add these mobile styles */
+@media (max-width: 768px) {
+  .carousel-section {
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .details-area {
+    max-width: 100%;
+    padding-right: 0;
+    order: 2;
+  }
+
+  .image-slider-wrapper {
+    max-width: 100%;
+    order: 1;
+  }
+
+  .details-title {
+    font-size: 1.5rem;
+  }
+
+  .price-range {
+    font-size: 1.3rem;
+  }
+
+  .add-to-cart-btn,
+  .details-btn {
+    width: 100%;
+    margin: 8px 0;
+    padding: 12px;
+  }
+
+  .features-list li {
+    font-size: 14px;
+  }
 }

@@ -9,6 +9,7 @@ const orderRoutes = require("./routes/orderRoutes");
 const contactRoutes = require("./routes/contactRoutes");
 const freeTrialRoutes = require("./routes/freeTrialRoutes");
 const adminRoutes = require("./routes/admin");
+const couponRoutes = require("./routes/couponRoutes");
 const app = express();
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
@@ -22,7 +23,6 @@ const cloudinary = require("cloudinary").v2;
 app.use(cookieParser());
 // connect to mongodb
 
-console.log("MongoDB URI:", uri);
 mongoose
   .connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
@@ -56,13 +56,19 @@ cloudinary.config({
 //   console.log(URL);
 // })();
 
-const corsConfig = {
-  credentials: true,
-  origin: process.env.FRONTEND_URL,
-  sameSite: "none",
-  Secure: true,
-};
-app.use(cors(corsConfig));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || origin.startsWith("http://localhost:")) {
+        callback(null, true); // Allow any localhost port
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+    optionsSuccessStatus: 200,
+  })
+);
 // initialize middleware
 app.use(bodyParser.json());
 
@@ -81,6 +87,7 @@ app.use("/api/services", serviceRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/order", orderRoutes);
 app.use("/api/paypal", paymentRoutes);
+app.use("/api/coupons", couponRoutes);
 // error handling middleware
 app.use((err, req, res, next) => {
   res.status(422).send({ error: err.message });

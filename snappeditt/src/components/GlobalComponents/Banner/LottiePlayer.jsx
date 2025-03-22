@@ -1,17 +1,10 @@
 import React, { useEffect } from 'react';
-import '@dotlottie/player-component'; // Import the Lottie player
 
 const LottiePlayer = ({ height = '80px', width = '80px', position = 'right-bottom' }) => {
   useEffect(() => {
-    // Ensure the Lottie player script is loaded
-    const script = document.createElement('script');
-    script.src = 'https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs';
-    script.type = 'module';
-    document.body.appendChild(script);
-
-    return () => {
-      document.body.removeChild(script);
-    };
+    import('@dotlottie/player-component').catch((err) =>
+      console.error("Failed to load Lottie Player:", err)
+    );
   }, []);
 
   // Determine the class based on the position prop
@@ -32,7 +25,9 @@ const LottiePlayer = ({ height = '80px', width = '80px', position = 'right-botto
         background="transparent"
         speed="1"
         style={{
-          width, height, filter: 'invert(32%) sepia(76%) saturate(6111%) hue-rotate(-5deg) brightness(91%) contrast(120%)' // Custom filter for #f44336 red color }}
+          width,
+          height,
+          filter: 'invert(32%) sepia(76%) saturate(6111%) hue-rotate(-5deg) brightness(91%) contrast(120%)',
         }}
         loop
         autoplay

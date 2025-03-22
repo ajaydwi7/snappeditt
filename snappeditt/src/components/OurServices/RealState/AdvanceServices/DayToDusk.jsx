@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
 import ImageComparisonSlider from '@/components/GlobalComponents/ImageComparisonSlider/ImageComparisonSlider';
 import './AdvanceServices.css';
+import { Link } from 'react-router-dom';
+import { CircleCheck, CircleX } from "lucide-react";
 
 const DayToDusk = () => {
+
+
   const service = {
     title: "Day To Dusk",
     price: "$5.00/Image",
     description: "With our Virtual Twilight service, we convert your day shot of your exterior property to a stunning and beautiful dusk/ twilight shot.",
+    buttonUrl: '/services/real-estate/day-to-dusk',
     features: [
       { name: 'Outdoor Sky Replacement', included: true },
       { name: 'Brightness & Contrast Adjustment', included: true },
@@ -39,6 +44,7 @@ const DayToDusk = () => {
     setCurrentSlide(index);
   };
 
+
   return (
     <div className="advance-container">
       <h3 className="advance-title">Advanced Services We Provide...</h3>
@@ -65,12 +71,20 @@ const DayToDusk = () => {
           <div className="content-area">
             <h4 className='content-area-title'>{service.title}</h4>
             <p className="price">{service.price}</p>
-            <button className="add-to-cart-btn">Add to Cart</button>
-            <button className="details-btn">More Details</button>
+            <button className="add-to-cart-btn">
+              <Link to={service.buttonUrl} className='
+              text-black'>Add to Cart</Link></button>
+            <button className="details-btn">
+              <Link to={service.buttonUrl} className='text-primaryBlack'>
+                More Details
+              </Link>
+            </button>
             <p className="description">{service.description}</p>
             <ul className="features-list">
               {service.features.map((feature, index) => (
-                <li key={index}>{feature.name}</li>
+                <li key={index}>
+                  <span className='pr-1'>{feature.included ? <CircleCheck className='text-green-500' /> : <CircleX className='text-primaryRed' />}</span> {feature.name}
+                </li>
               ))}
             </ul>
           </div>

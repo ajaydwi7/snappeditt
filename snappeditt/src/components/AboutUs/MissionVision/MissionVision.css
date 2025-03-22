@@ -39,14 +39,27 @@
 /* Responsive design */
 @media (max-width: 768px) {
   .mission-vision-container {
+    width: 100%;
     flex-direction: column;
     text-align: center;
-    padding: 20px;
+    padding: 0;
   }
 
   .mission-vision-content {
     padding-right: 0;
-    margin-bottom: 20px;
+    /* margin-bottom: 20px; */
+  }
+
+  .section-title {
+    font-size: 2rem;
+    text-align: center;
+  }
+
+  .section-text {
+    font-size: 1rem;
+  }
+  .mission-vision-image {
+    padding: 0;
   }
 
   .mission-vision-image img {

@@ -1,62 +1,136 @@
 import React from "react";
 import { PayPalButtons } from "@paypal/react-paypal-js";
+import { toast } from "react-toastify";
 
-const PayPalButton = ({ cartTotal, cartItems, onSuccess }) => {
-  // Create an order
+const PayPalButton = ({ cartTotal, cartItems, onSuccess, disabled, userId, billingDetails, couponCode, discount }) => {
   const createOrder = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/paypal/create-order`, {
+
+
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+      // Convert to number first before formatting
+      const numericTotal = Number(cartTotal) || 0;
+      const formattedTotal = numericTotal.toFixed(2);
+      const response = await fetch(`${apiUrl}/paypal/create-order`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          orderTotal: cartTotal,
-          items: cartItems,
+          orderTotal: numericTotal,
+          items: cartItems.map((item) => ({
+            name: item.serviceName || "Unnamed Service",
+            unit_amount: { currency_code: "USD", value: (parseFloat(item.finalPrice ?? item.basePrice) || 0).toFixed(2), },
+            quantity: parseInt(item.quantity, 10) || 1,
+          })),
         }),
+        credentials: "include",
       });
 
-      const data = await response.json();
-      return data.id; // Return PayPal order ID
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to create PayPal order");
+      }
+
+      const orderData = await response.json();
+      return orderData.id;
     } catch (error) {
-      console.error("Error creating order:", error);
+      console.error("PayPal create order error:", error);
+      toast.error("Failed to create PayPal order. Please try again.");
       throw error;
     }
   };
 
-  // Capture the order after approval
-  const onApprove = async (data) => {
+  const onApprove = async (data, actions) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/paypal/capture-order/${data.orderID}`, {
+      if (!data.orderID || !data.payerID) throw new Error("Order ID or Payer ID is missing.");
+
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+      const captureResponse = await fetch(`${apiUrl}/paypal/capture-order/${data.orderID}`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: data.orderID, payerId: data.payerID }),
+        credentials: "include",
       });
 
-      const orderData = await response.json();
+      if (!captureResponse.ok) {
+        const errorData = await captureResponse.json();
+        throw new Error(errorData.error || "Failed to capture payment");
+      }
+      // Validate cart items before saving
+      if (!cartItems.every(item =>
+        Number.isFinite(item.basePrice) &&
+        Number.isFinite(item.finalPrice)
+      )) {
+        throw new Error("Invalid price configuration in cart items");
+      }
 
-      if (orderData.status === "COMPLETED") {
-        alert("Payment Successful!");
-        onSuccess(orderData); // Trigger onSuccess callback
-      } else {
-        alert("Payment not completed.");
+      const captureData = await captureResponse.json();
+      if (captureData.status === "COMPLETED") {
+        const orderDetails = {
+          user_id: userId,
+          totalCost: Number(cartTotal || 0).toFixed(2),
+          paypalOrderId: captureData.id,
+          billingDetails,
+          items: cartItems.map((item) => ({
+            serviceId: item.serviceId || item.id,
+            serviceName: item.serviceName,
+            basePrice: item.basePrice, // Add this line
+            finalPrice: parseFloat(item.finalPrice ?? item.basePrice), // Changed from 'price'
+            quantity: parseInt(item.quantity, 10),
+            totalPrice: (parseFloat(item.finalPrice ?? item.basePrice) * parseInt(item.quantity, 10)).toFixed(2),
+            featureImage: item.featureImage,
+            formData: item.formData || {},
+            selectedVariations: item.selectedVariations || [],
+          })),
+          couponCode: couponCode || null,
+          discount: discount || 0,
+          paymentStatus: 'Completed',
+          invoiceUrl: captureData.invoiceUrl || `/api/order/${captureData.id}/invoice`
+        };
+
+
+        const saveOrderResponse = await fetch(`${apiUrl}/order/confirm`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(orderDetails),
+          credentials: "include",
+        });
+
+
+        if (!saveOrderResponse.ok) {
+          const errorData = await saveOrderResponse.json();
+          throw new Error(errorData.error || "Failed to save order to database");
+        }
+
+        const savedOrderData = await saveOrderResponse.json(); // Get saved order data
+        toast.success("Payment successful! Order has been placed.");
+        await onSuccess(savedOrderData); // Pass saved order data to onSuccess
       }
     } catch (error) {
-      console.error("Error capturing order:", error);
-      alert("Failed to capture order.");
+      console.error("Full PayPal capture error:", error);
+      toast.error(
+        error.message.includes("validation")
+          ? "Order validation failed: Check your item configurations"
+          : "Payment succeeded but order creation failed. Contact support."
+      );
     }
   };
 
-  // Handle errors
-  const onError = (error) => {
-    console.error("PayPal Button Error:", error);
-    alert("An error occurred during the PayPal transaction.");
-  };
-
   return (
-    <PayPalButtons
-      createOrder={createOrder}
-      onApprove={onApprove}
-      onError={onError}
-    />
+    <div className={`${disabled ? "opacity-50 pointer-events-none" : ""}`}>
+      <PayPalButtons
+        createOrder={createOrder}
+        onApprove={onApprove}
+        onError={(error) => {
+          console.error("PayPal error:", error);
+          toast.error("An error occurred with PayPal. Please try again.");
+        }}
+        onCancel={() => {
+          toast.info("Payment cancelled. You can try again when ready.");
+        }}
+        style={{ layout: "vertical", color: "blue", shape: "rect", label: "pay" }}
+        disabled={disabled}
+      />
+    </div>
   );
 };
 

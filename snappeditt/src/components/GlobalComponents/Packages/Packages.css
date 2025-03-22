@@ -7,15 +7,15 @@
 .packages-title {
   text-align: left;
   font-family: "Courgette", cursive;
-  font-size: 2.5rem;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
   color: #f44336;
-  padding-bottom: 20px;
 }
 
 .content-wrapper {
   display: flex;
   justify-content: space-between;
-  gap: 20px;
+  gap: 2rem;
   padding: 20px;
   border: 1px #333;
   border-style: none solid solid;
@@ -35,6 +35,7 @@
   height: 500px; */
   justify-content: center;
   margin-bottom: 20px;
+  transition: opacity 0.3s ease;
 }
 
 .image-comparison-slider {
@@ -48,16 +49,16 @@
   display: flex;
   justify-content: center;
   gap: 10px;
-  margin-top: 10px;
+  margin-top: 15px;
 }
 
-.dots.bottom-dots {
-  margin-top: 15px; /* Move dots to the bottom */
-}
+/* .dots.bottom-dots {
+  margin-top: 15px; Move dots to the bottom
+} */
 
 .dot {
-  width: 12px;
-  height: 12px;
+  width: 15px;
+  height: 15px;
   background-color: #bbb;
   border-radius: 50%;
   display: inline-block;
@@ -65,10 +66,125 @@
 }
 
 .dot.active {
-  background-color: #717171;
+  background-color: #f44336;
 }
 
 /* Adjust right-side card height to match the slider */
 .right-side-card-wrapper {
   width: 30%; /* Match the slider height */
+}
+
+/* Packages.css */
+@media (max-width: 768px) {
+  /* .content-wrapper {
+    flex-direction: column;
+    gap: 30px;
+    padding: 15px 0;
+  }
+
+  .carousel {
+    order: 1;
+  }
+
+  .right-side-card-wrapper {
+    width: 100%;
+    order: 2;
+    padding: 0 10px;
+  } 
+
+  .packages-title {
+    font-size: 1.8rem;
+    padding-left: 15px;
+  }
+
+  .check-packages-btn {
+    width: 100%;
+    padding: 18px;
+    font-size: 16px;
+  }*/
+}
+
+/* Mobile Accordion Styles */
+.mobile-tabs-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.mobile-tab-item {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.mobile-tab-header {
+  width: 100%;
+  padding: 1.2rem;
+  background: #fff;
+  border: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mobile-tab-header.active {
+  background: #f8f8f8;
+}
+
+.mobile-tab-indicator {
+  font-size: 1.4rem;
+  margin-left: 1rem;
+}
+
+.mobile-tab-content {
+  padding: 1rem;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 768px) {
+  .main-container {
+    width: 100%;
+  }
+  .content-wrapper {
+    flex-direction: column;
+    padding: 0;
+    gap: 30px;
+  }
+
+  .right-side-card-wrapper {
+    width: 100%;
+    margin-top: 1.5rem;
+  }
+
+  .carousel-slide {
+    max-height: 300px;
+  }
+
+  .dots {
+    margin-top: 1rem;
+  }
+  .dots.bottom-dots {
+    justify-content: center;
+  }
+
+  /* Hide desktop tabs on mobile */
+  .tabs-container {
+    display: none;
+  }
+}
+
+/* Desktop styles */
+@media (min-width: 769px) {
+  .mobile-tabs-container {
+    display: none;
+  }
 }

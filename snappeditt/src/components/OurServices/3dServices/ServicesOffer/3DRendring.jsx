@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
-
+import { Link } from 'react-router-dom';
 const ThreeDRendring = () => {
   const service = {
     title: "3D Rendering",
     price: "$0.00 – $250.00/Image",
     description: "Snapp Editt offers offers a variety of 3D rendering services to create visualizations that bring your projects to life right before your eyes. We can create 3D architectural renderings for construction, real estate and building projects, 3D interior renderings for home renovation projects, and much more!",
+    buttonUrl: '/services/3d-services/3d-rendering',
     images: [
       [
         new URL('@/assets/images/Declutter-SPH-Raw-1.jpg', import.meta.url).href,
@@ -43,8 +44,10 @@ const ThreeDRendring = () => {
         <div className="details-area">
           <h4 className="details-title">{service.title}</h4>
           <p className="price-range">{service.price}</p>
-          <button className="add-to-cart-btn">Add to Cart</button>
-          <button className="details-btn">More Details</button>
+          <button className="add-to-cart-btn"><Link to={service.buttonUrl} className='
+              text-black'>Add to Cart</Link></button>
+          <button className="details-btn"><Link to={service.buttonUrl} className='
+              text-black'>More Details</Link></button>
           <p className="service-description">{service.description}</p>
         </div>
 

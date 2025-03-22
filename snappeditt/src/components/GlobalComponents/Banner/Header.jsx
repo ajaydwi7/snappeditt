@@ -79,10 +79,17 @@ export const Header83 = (props) => {
                 {buttons.map((button, index) => (
                   <Button
                     key={index}
-                    as="a" // Use 'a' tag for link behavior
-                    href={button.url} // Use the URL from the button object
-                    {...button}
-                    style={{ backgroundColor: '#f44336', color: '#fff', borderRadius: '25px' }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const target = document.querySelector(button.url);
+                      target?.scrollIntoView({ behavior: "smooth" });
+                    }}
+                    style={{
+                      backgroundColor: '#f44336',
+                      color: '#fff',
+                      borderRadius: '25px',
+                      cursor: 'pointer'
+                    }}
                   >
                     <FaArrowDown className="ml-2" />
                     {button.title}

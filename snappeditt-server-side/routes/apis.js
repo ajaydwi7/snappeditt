@@ -1,6 +1,7 @@
 const express = require("express");
 const authController = require("../Controller/authController");
 const checkAuth = require("../middleware/checkAuth");
+const User = require("../models/User");
 
 const router = express.Router();
 
@@ -14,5 +15,19 @@ router.get("/users", checkAuth, (req, res, next) => {
     .then((users) => res.json(users))
     .catch((err) => res.status(500).json({ error: "Failed to fetch users" }));
 });
+router.get("/users/:id", checkAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: "Error fetching user data" });
+  }
+});
+
+// Password reset routes
+router.post("/forgot-password", authController.forgotPassword);
+router.post("/reset-password/:token", authController.resetPassword);
+router.post("/change-password", checkAuth, authController.changePassword);
 
 module.exports = router;

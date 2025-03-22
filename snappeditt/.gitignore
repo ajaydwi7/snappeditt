@@ -25,7 +25,7 @@ Screens
 *.sw?
 
 # dotenv environment variables file
-
+.env
 .env.development
 
 .env.production

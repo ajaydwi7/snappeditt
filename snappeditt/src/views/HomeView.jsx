@@ -4,7 +4,7 @@ import InfoSection from "@/components/Home/Informations/InfoSection";
 import OurServices from "@/components/Home/Services/OurServices";
 import TimelineSection from "@/components/Home/Timeline/timelineSection";
 import TestimonialSection from "@/components/Home/Testimonials/Testomonials";
-import Loder from "../components/GlobalContext/Loader";
+
 
 
 

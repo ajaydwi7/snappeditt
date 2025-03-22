@@ -15,6 +15,9 @@ const UserSchema = new Schema({
     type: String,
     required: [true, "Username is required"],
   },
+  resetToken: String,
+  resetTokenExpiration: Date,
+  createdAt: Date,
 });
 
 // Before save encrypt password
